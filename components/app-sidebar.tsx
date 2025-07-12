@@ -1,10 +1,8 @@
-"use client"
-
 import * as React from "react"
 import {
   BookOpen,
   Bot,
-  Command,
+  AirVent,
   Frame,
   LifeBuoy,
   Map,
@@ -12,6 +10,7 @@ import {
   Send,
   Settings2,
   SquareTerminal,
+  LucideIcon,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -28,49 +27,71 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const data = {
+
+export interface SidebarData {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: string;
+    email: string;
+    avatar: string;
+  };
+  navMain: {
+    title: string;
+    url: string;
+    icon: LucideIcon;
+    isActive: boolean;
+    items?: {
+      title: string;
+      url: string;
+    }[];
+  }[];
+  navSecondary: {
+    title: string;
+    url: string;
+    icon: LucideIcon;
+  }[];
+  projects: {
+    name: string;
+    url: string;
+    icon: LucideIcon;
+  }[];
+}
+
+const data: SidebarData = {
+  user: {
+    name: "Admin",
+    email: "admin@example.com",
+    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   navMain: [
     {
-      title: "Playground",
+      title: "Admin",
       url: "#",
       icon: SquareTerminal,
-      isActive: true,
+      isActive: false,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Submit Order",
+          url: "/dashboard/submit-order",
         },
         {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
+          title: "Orders",
+          url: "/dashboard/orders",
         },
       ],
     },
     {
-      title: "Models",
+      title: "Workers",
       url: "#",
       icon: Bot,
+      isActive: false,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "Jobs",
+          url: "/dashboard/jobs",
         },
         {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
+          title: "Settings",
+          url: "/dashboard/settings",
         },
       ],
     },
@@ -78,6 +99,7 @@ const data = {
       title: "Documentation",
       url: "#",
       icon: BookOpen,
+      isActive: false,
       items: [
         {
           title: "Introduction",
@@ -101,6 +123,7 @@ const data = {
       title: "Settings",
       url: "#",
       icon: Settings2,
+      isActive: false,
       items: [
         {
           title: "General",
@@ -153,6 +176,7 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -161,11 +185,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
+                  <AirVent className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium">SejookNamatey</span>
+                  <span className="truncate text-xs">Sejuk Sejuk Service Sdn Bhd</span>
                 </div>
               </a>
             </SidebarMenuButton>
