@@ -15,6 +15,7 @@ import {
     reauthenticateWithCredential,
     UserCredential
 } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 interface AuthContextType {
     user: User | null;
@@ -30,6 +31,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+    const router = useRouter()
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -98,6 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const logout = async () => {
         try {
             await signOut(auth);
+            router.push('/login');
         } catch (error) {
             console.error('Error signing out:', error);
             throw error;

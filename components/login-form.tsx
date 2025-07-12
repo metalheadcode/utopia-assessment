@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import Image from "next/image"
 import { useAuth } from "@/app/context/auth-context"
 import { toast } from "sonner"
+import { useState } from "react"
 
 
 export function LoginForm({
@@ -16,6 +17,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
 
   const { sendLoginLink } = useAuth()
+  const [isSending, setIsSending] = useState<boolean>(false)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -25,12 +27,10 @@ export function LoginForm({
       return
     }
 
-    console.log('EMAIL', email)
-
     try {
       await sendLoginLink(email)
       toast.success("Sign in link sent to email")
-      console.log('SUCCESS: Sign in link sent')
+      setIsSending(true);
     } catch (error) {
       toast.error("Failed to send sign in link")
       console.error('ERROR RESPONSE', error)
@@ -40,6 +40,14 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+
+      {isSending && (
+        <div className="flex justify-center items-center bg-black text-white p-2 rounded-md text-sm">
+          <p>If you haven&apos;t received the email, please check your <span className="font-bold">spam</span> or <span className="font-bold">junk mail</span> folder.</p>
+        </div>
+      )}
+
+
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
