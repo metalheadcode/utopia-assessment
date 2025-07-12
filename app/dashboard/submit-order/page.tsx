@@ -13,6 +13,9 @@ import { Technician } from "@/types/global.d.types";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import MalaysiaAddress from "@/components/forms/malaysia-address";
+import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal } from "lucide-react";
 
 // Enhanced validation schema
 const formSchema = z.object({
@@ -47,7 +50,7 @@ export default function SubmitOrderPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             customerName: "",
-            phone: "",
+            phone: "+6",
             address: "",
             service: undefined,
             quotedPrice: "",
@@ -56,7 +59,7 @@ export default function SubmitOrderPage() {
         }
     });
 
-    const { control, handleSubmit, reset, watch } = form;
+    const { control, handleSubmit, reset, watch, formState: { errors } } = form;
 
     const onSubmit = async (data: FormData) => {
         setIsSubmitting(true);
@@ -72,10 +75,10 @@ export default function SubmitOrderPage() {
             reset();
 
             // Show success message (you could use a toast notification here)
-            alert("Order submitted successfully!");
+            toast.success("Order submitted successfully!");
 
         } catch (error) {
-            setSubmitError("Failed to submit order. Please try again.");
+            toast.error("Failed to submit order. Please try again.");
             console.error("Submit error:", error);
         } finally {
             setIsSubmitting(false);
@@ -140,8 +143,35 @@ export default function SubmitOrderPage() {
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    placeholder="+1234567890"
+                                                    placeholder="+60123456789"
                                                     {...field}
+                                                    type="tel"
+                                                    pattern="^\+?[1-9]\d{0,15}$"
+                                                    onKeyDown={(e) => {
+                                                        // Allow: backspace, delete, tab, escape, enter, and navigation keys
+                                                        if ([8, 9, 27, 13, 46, 37, 39].indexOf(e.keyCode) !== -1 ||
+                                                            // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                                                            (e.keyCode === 65 && e.ctrlKey === true) ||
+                                                            (e.keyCode === 67 && e.ctrlKey === true) ||
+                                                            (e.keyCode === 86 && e.ctrlKey === true) ||
+                                                            (e.keyCode === 88 && e.ctrlKey === true)) {
+                                                            return;
+                                                        }
+                                                        // Allow: +, numbers, and some special characters
+                                                        if ((e.keyCode >= 48 && e.keyCode <= 57) || // numbers
+                                                            e.keyCode === 43 || // plus sign
+                                                            e.keyCode === 45 || // minus sign
+                                                            e.keyCode === 32) { // space
+                                                            return;
+                                                        }
+                                                        // Prevent all other keys
+                                                        e.preventDefault();
+                                                    }}
+                                                    onChange={(e) => {
+                                                        // Remove any non-numeric characters except +, -, and spaces
+                                                        const value = e.target.value.replace(/[^\d+\-\s]/g, '');
+                                                        field.onChange(value);
+                                                    }}
                                                 />
                                             </FormControl>
                                             <FormDescription>
@@ -360,17 +390,20 @@ export default function SubmitOrderPage() {
                         </div>
                     </div>
 
-
-
-                    {submitError && <div className="space-y-2">
-                        <h3 className="text-sm font-medium text-muted-foreground mb-2">Errors</h3>
-                        <div className="space-y-2">
-                            <div>
-                                <Label className="text-xs text-muted-foreground">Error</Label>
-                                <p className="font-medium">{submitError}</p>
-                            </div>
+                    {errors && Object.keys(errors).length > 0 &&
+                        <div className="space-y-2 mt-4">
+                            {Object.keys(errors).map((key) => (
+                                <Alert key={key} variant="destructive">
+                                    <Terminal />
+                                    <AlertTitle>Error</AlertTitle>
+                                    <AlertDescription>
+                                        {errors[key as keyof typeof errors]?.message}
+                                    </AlertDescription>
+                                </Alert>
+                            ))}
                         </div>
-                    </div>}
+                    }
+                    {/* ERROR END HERE  */}
                 </CardContent>
             </Card>
         </div>
