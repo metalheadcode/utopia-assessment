@@ -30,7 +30,7 @@
 
 ## 🎯 Project Overview
 
-This project is a showcase of **@metalheadcode**'s full-stack development skills, demonstrating expertise in:
+This project is a showcase of (**@metalheadcode's**)[https://github.com/metalheadcode] full-stack development skills, demonstrating expertise in:
 
 - 🎨 **Modern React/Next.js** application architecture
 - 🔷 **TypeScript** and strong typing practices
@@ -181,7 +181,7 @@ utopia-assessment/
 
 </div>
 
-This project and all associated code belongs to **@metalheadcode**. While made public for portfolio and assessment purposes, this work was created in good faith as part of an evaluation process. The code remains the intellectual property of @metalheadcode and may not be used, copied, or repurposed without explicit permission.
+This project and all associated code belongs to (**@metalheadcode**)[https://github.com/metalheadcode]. While made public for portfolio and assessment purposes, this work was created in good faith as part of an evaluation process. The code remains the intellectual property of (**@metalheadcode**)[https://github.com/metalheadcode] and may not be used, copied, or repurposed without explicit permission.
 
 ### 🚫 Disclaimer
 This assessment was shared publicly to demonstrate skills and capabilities. It was **not intended as free work** or for commercial use. Any unauthorized use or reproduction of this code without consent is **strictly prohibited**.
@@ -190,13 +190,13 @@ This assessment was shared publicly to demonstrate skills and capabilities. It w
 
 ## 📄 License
 
-This project is proprietary and confidential. All rights reserved by @metalheadcode.
+This project is proprietary and confidential. All rights reserved by (@metalheadcode)[https://github.com/metalheadcode].
 
 ---
 
 <div align="center">
 
-### 🌟 Made with ❤️ by @metalheadcode
+### 🌟 Made with ❤️ by (@metalheadcode)[https://github.com/metalheadcode]
 
 *Building the future, one line of code at a time* 🚀
 
