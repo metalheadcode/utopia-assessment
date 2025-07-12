@@ -35,8 +35,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
+    console.log('USER', user)
+
     const actionCodeSettings = {
-        url: `https://utopia-assessment.vercel.app/dashboard`,
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
         handleCodeInApp: true,
     };
 

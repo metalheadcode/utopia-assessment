@@ -16,6 +16,10 @@ import MalaysiaAddress from "@/components/forms/malaysia-address";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
+import { useAuth } from "@/app/context/auth-context";
+import { db } from "@/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 
 // Enhanced validation schema
 const formSchema = z.object({
@@ -45,6 +49,8 @@ const serviceOptions = [
 export default function SubmitOrderPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
+    const { user } = useAuth();
+    const router = useRouter();
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -66,19 +72,36 @@ export default function SubmitOrderPage() {
         setSubmitError(null);
 
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (!user) {
+                throw new Error("You must be logged in to submit an order");
+            }
 
-            console.log("Form submitted:", data);
+            // Prepare order data for Firestore
+            const orderData = {
+                ...data,
+                quotedPrice: parseFloat(data.quotedPrice),
+                submittedBy: user.uid,
+                submittedByEmail: user.email,
+                status: "pending",
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+            };
+
+            // Add document to Firestore
+            const ordersCollection = collection(db, "orders");
+            const docRef = await addDoc(ordersCollection, orderData);
 
             // Reset form on success
             reset();
 
-            // Show success message (you could use a toast notification here)
-            toast.success("Order submitted successfully!");
+            // Show success message
+            toast.success(`Order ${docRef.id} submitted successfully!`);
 
+            router.push(`/dashboard/orders`);
         } catch (error) {
-            toast.error("Failed to submit order. Please try again.");
+            const errorMessage = error instanceof Error ? error.message : "Failed to submit order. Please try again.";
+            setSubmitError(errorMessage);
+            toast.error(errorMessage);
             console.error("Submit error:", error);
         } finally {
             setIsSubmitting(false);
