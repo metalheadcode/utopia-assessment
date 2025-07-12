@@ -1,0 +1,70 @@
+{
+  "orders": [
+    {
+      "orderId": "ORDER1234",
+      "customerName": "Ahmad",
+      "address": "No. 12, Jalan Sejuk, Shah Alam",
+      "service": "Aircond cleaning",
+      "assignedTechnician": "Ali",
+      "status": "Pending"
+    },
+    {
+      "orderId": "ORDER1235",
+      "customerName": "Budi",
+      "address": "No. 12, Jalan Sejuk, Shah Alam",
+      "service": "Aircond cleaning",
+      "assignedTechnician": "John",
+      "status": "Pending"
+    },
+    {
+      "orderId": "ORDER1236",
+      "customerName": "Ah Seng",
+      "address": "No. 12, Jalan Sejuk, Shah Alam",
+      "service": "Aircond cleaning",
+      "assignedTechnician": "Bala",
+      "status": "Pending"
+    },
+    {
+      "orderId": "ORDER1237",
+      "customerName": "Hazim",
+      "address": "No. 12, Jalan Sejuk, Shah Alam",
+      "service": "Aircond cleaning",
+      "assignedTechnician": "Yusof",
+      "status": "Pending"
+    },
+    {
+      "orderId": "ORDER1238",
+      "customerName": "Krisna",
+      "address": "No. 12, Jalan Sejuk, Shah Alam",
+      "service": "Aircond cleaning",
+      "assignedTechnician": "Bala",
+      "status": "Pending"
+    }
+  ],
+  "technicians": [
+    {
+      "name": "Ali",
+      "email": "ali.ahmad@gmail.com",
+      "phone": "0123456789",
+      "address": "No. 12, Jalan Sejuk, Shah Alam"
+    },
+    {
+      "name": "John",
+      "email": "john.travor@gmail.com",
+      "phone": "0123456789",
+      "address": "No. 12, Jalan Sejuk, Shah Alam"
+    },
+    {
+      "name": "Bala",
+      "email": "bala.krisna@gmail.com",
+      "phone": "0123456789",
+      "address": "No. 12, Jalan Sejuk, Shah Alam"
+    },
+    {
+      "name": "Yusof",
+      "email": "yuso.tayyub@gmail.com",
+      "phone": "0123456789",
+      "address": "No. 12, Jalan Sejuk, Shah Alam"
+    }
+  ]
+}
