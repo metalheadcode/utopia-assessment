@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     const actionCodeSettings = {
-        url: `http://localhost:3000/dashboard`,
+        url: `https://utopia-assessment.vercel.app/dashboard`,
         handleCodeInApp: true,
     };
 
