@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "@/firebase/root";
+import { UserProfile, WorkerDelegation, DelegationPermission } from "@/types/global.d.types";
+import { UserService, DelegationService } from "@/lib/user-service";
 import {
     signOut,
     User,
@@ -19,8 +21,12 @@ interface AuthContextType {
     user: User | null;
     userRole: "admin" | "worker" | "client" | null;
     userClaims: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    userProfile: UserProfile | null;
+    availableDelegations: WorkerDelegation[];
+    currentImpersonation: WorkerDelegation | null;
     loading: boolean;
     refreshUserClaims: () => Promise<void>;
+    refreshUserProfile: () => Promise<void>;
     getUserRole: () => Promise<string | null>;
     getUserClaims: () => Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
     createAdminRole: (uid: string) => Promise<void>;
@@ -31,8 +37,10 @@ interface AuthContextType {
     signInWithEmailLink: (email: string, url: string) => Promise<UserCredential>;
     linkEmailToUser: (email: string, url: string) => Promise<UserCredential>;
     reauthenticateWithEmailLink: (email: string, url: string) => Promise<UserCredential>;
+    startImpersonation: (delegation: WorkerDelegation) => void;
+    stopImpersonation: () => void;
+    canPerformAction: (action: string) => boolean;
     logout: () => Promise<void>;
-
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,6 +50,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [userRole, setUserRole] = useState<"admin" | "worker" | "client" | null>(null);
     const [userClaims, setUserClaims] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+    const [availableDelegations, setAvailableDelegations] = useState<WorkerDelegation[]>([]);
+    const [currentImpersonation, setCurrentImpersonation] = useState<WorkerDelegation | null>(null);
     const [loading, setLoading] = useState(true);
 
     const actionCodeSettings = {
@@ -69,6 +80,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUserClaims(claims);
         } catch (error) {
             console.error('Error refreshing user claims:', error);
+        }
+    };
+
+    // Refresh user profile from Firestore
+    const refreshUserProfile = async () => {
+        try {
+            if (!auth.currentUser) return;
+
+            const profile = await UserService.getUserProfile(auth.currentUser.uid);
+            setUserProfile(profile);
+
+            // If user is admin, load available delegations
+            if (profile?.role === 'admin') {
+                const delegations = await DelegationService.getAdminDelegations(auth.currentUser.uid);
+                setAvailableDelegations(delegations);
+            }
+        } catch (error) {
+            console.error('Error refreshing user profile:', error);
         }
     };
 
@@ -198,9 +227,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    // Impersonation functions
+    const startImpersonation = (delegation: WorkerDelegation) => {
+        setCurrentImpersonation(delegation);
+    };
+
+    const stopImpersonation = () => {
+        setCurrentImpersonation(null);
+    };
+
+    const canPerformAction = (action: string): boolean => {
+        // If not impersonating, check user's own role
+        if (!currentImpersonation) {
+            return userRole === 'admin' || (userRole === 'worker' && ['take_jobs', 'complete_jobs'].includes(action));
+        }
+
+        // If impersonating, check delegation permissions
+        return currentImpersonation.permissions.includes(action as DelegationPermission);
+    };
+
     const logout = async () => {
         try {
             await signOut(auth);
+            setCurrentImpersonation(null); // Clear impersonation on logout
             router.push('/login');
         } catch (error) {
             console.error('Error signing out:', error);
@@ -221,12 +270,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     const idTokenResult = await user.getIdTokenResult();
                     setUserRole(idTokenResult.claims.role as "admin" | "worker" | "client" || null);
                     setUserClaims(idTokenResult.claims);
+
+                    // Load user profile
+                    await refreshUserProfile();
                 } catch (error) {
-                    console.error('Error loading user claims:', error);
+                    console.error('Error loading user data:', error);
                 }
             } else {
                 setUserRole(null);
                 setUserClaims(null);
+                setUserProfile(null);
+                setAvailableDelegations([]);
+                setCurrentImpersonation(null);
             }
 
             setLoading(false);
@@ -238,8 +293,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         user,
         userRole,
         userClaims,
+        userProfile,
+        availableDelegations,
+        currentImpersonation,
         loading,
         refreshUserClaims,
+        refreshUserProfile,
         getUserRole,
         getUserClaims,
         createAdminRole,
@@ -250,6 +309,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signInWithEmailLink,
         linkEmailToUser,
         reauthenticateWithEmailLink,
+        startImpersonation,
+        stopImpersonation,
+        canPerformAction,
         logout
     };
 
