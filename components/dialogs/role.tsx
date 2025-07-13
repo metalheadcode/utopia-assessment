@@ -24,7 +24,16 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>
 
 export function RoleDialog({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (open: boolean) => void }) {
-    const { userRole } = useAuth()
+    // ✅ Import all role creation functions
+    const {
+        user,
+        userRole,
+        createAdminRole,
+        createWorkerRole,
+        createClientRole,
+        refreshUserClaims
+    } = useAuth()
+
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -43,32 +52,43 @@ export function RoleDialog({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: 
 
         try {
             if (data.role === "") {
-                return setError("role", { message: "Role is required to continue using the system" })
+                return setError("role", { message: "Please choose a role to continue using the system" })
             }
 
-
-            if (!userRole) {
-                return setError("role", { message: "Role is required to continue using the system" })
+            if (!user?.uid) {
+                throw new Error("User not found")
             }
 
-            // Here you would typically update the user profile in Firebase
-            // For now, we'll just log the data and show a success message
-            console.log("Profile update data:", data)
+            // ✅ FIXED: Call the appropriate role function based on selection
+            switch (data.role) {
+                case "admin":
+                    await createAdminRole(user.uid)
+                    toast.success("You are now an admin!")
+                    await refreshUserClaims()
+                    break
+                case "worker":
+                    await createWorkerRole(user.uid)
+                    toast.success("You are now a worker!")
+                    await refreshUserClaims()
+                    break
+                case "client":
+                    await createClientRole(user.uid)
+                    toast.success("You are now a client!")
+                    await refreshUserClaims()
+                    break
+                default:
+                    throw new Error("Invalid role selected")
+            }
 
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000))
-
-            // Show success message
-            toast.success("Profile updated successfully!")
-
-            // Reset form with new values
+            // ✅ No need to call refreshUserClaims() - it's called automatically
             reset(data)
             setIsOpen(false)
+
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : "Failed to update profile. Please try again."
+            const errorMessage = error instanceof Error ? error.message : "Failed to update role. Please try again."
             setSubmitError(errorMessage)
             toast.error(errorMessage)
-            console.error("Profile update error:", error)
+            console.error("Role update error:", error)
         } finally {
             setIsSubmitting(false)
         }
@@ -87,7 +107,6 @@ export function RoleDialog({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: 
                 <div className="col-span-1">
                     <Form {...form}>
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                            {/* Personal Information */}
                             <div className="space-y-4">
                                 <FormField
                                     control={control}
@@ -120,6 +139,15 @@ export function RoleDialog({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: 
                                     )}
                                 />
                             </div>
+
+                            {/* ✅ Show current role for reference */}
+                            {userRole && (
+                                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                    <p className="text-blue-600 text-sm">
+                                        Current role: <strong>{userRole}</strong>
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Error Display */}
                             {submitError && (

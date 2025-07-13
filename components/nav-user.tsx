@@ -29,7 +29,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/app/context/auth-context"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { ProfileDialog } from "./dialogs/profile"
 import { RoleDialog } from "./dialogs/role"
 
@@ -46,6 +46,22 @@ export function NavUser({
   const { logout, user: authUser, userRole } = useAuth()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isRoleOpen, setIsRoleOpen] = useState(userRole === null)
+
+  const roleLabel = useMemo(() => {
+    if (userRole === null) {
+      return "No role"
+    }
+    if (userRole === "admin") {
+      return "Admin"
+    }
+    if (userRole === "worker") {
+      return "Worker"
+    }
+    if (userRole === "client") {
+      return "Client"
+    }
+    return ""
+  }, [userRole])
 
   return (
     <>
@@ -64,7 +80,7 @@ export function NavUser({
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{authUser?.displayName || "NO NAME"}</span>
+                  <span className="truncate font-medium">{authUser?.displayName || roleLabel || ""}</span>
                   <span className="truncate text-xs">{authUser?.email}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
@@ -83,7 +99,7 @@ export function NavUser({
                     <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{authUser?.displayName || "NO NAME"}</span>
+                    <span className="truncate font-medium">{authUser?.displayName || roleLabel || ""}</span>
                     <span className="truncate text-xs">{authUser?.email}</span>
                   </div>
                 </div>
