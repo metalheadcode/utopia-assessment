@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        console.log(phoneRegex)
+
         // Validate environment variables
         if (!process.env.WHATSAPP_PHONE_NUMBER_ID || !process.env.WHATSAPP_ACCESS_TOKEN) {
             console.error("Missing WhatsApp environment variables");
@@ -36,7 +38,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const url = `https://graph.facebook.com/v17.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`;
+        const url = `https://graph.facebook.com/v22.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`;
 
         const whatsappResponse = await fetch(url, {
             method: "POST",
@@ -53,6 +55,8 @@ export async function POST(request: NextRequest) {
                 }
             }),
         });
+
+        console.log(whatsappResponse)
 
         // ✅ FIXED: Get the actual JSON data
         const responseData = await whatsappResponse.json();

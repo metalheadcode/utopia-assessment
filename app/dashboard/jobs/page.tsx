@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/app/context/auth-context";
-import { useWhatsapp } from "@/app/context/whatsapp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -16,6 +15,7 @@ import { toast } from "sonner";
 interface Order {
     id: string;
     customerName: string;
+    customerEmail: string;
     phone: string;
     address: string;
     service: string;
@@ -31,7 +31,7 @@ interface Order {
 
 export default function JobsPage() {
     const { user, userRole } = useAuth();
-    const { sendJobCompletionMessage, isLoading: whatsappLoading, error: whatsappError, success: whatsappSuccess, clearMessages } = useWhatsapp();
+
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -55,7 +55,7 @@ export default function JobsPage() {
     const completeJobHandler = async (order: Order) => {
         if (userRole === "worker" && user) {
             try {
-                // Update order status in Firestore
+                // Update order status
                 const orderRef = doc(db, "orders", order.id);
                 await updateDoc(orderRef, {
                     status: "COMPLETED",
@@ -63,36 +63,39 @@ export default function JobsPage() {
                     completedBy: user.uid
                 });
 
-                // Send WhatsApp notification
-                await sendJobCompletionMessage({
-                    customerName: order.customerName,
-                    customerPhone: order.phone,
-                    orderId: order.id,
-                    service: order.service,
-                    technicianName: order.assignedTechnician,
-                    // technicianPhone: "+60123456789", // Optional
-                    completedAt: new Date().toLocaleString('en-MY', {
-                        timeZone: 'Asia/Kuala_Lumpur',
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
+                // Send email notification
+                const emailResponse = await fetch('/api/email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        to: order.customerEmail, // Customer email
+                        subject: `Job Completed - Order #${order.id.slice(-8)}`,
+                        clientName: order.customerName,
+                        technicianName: order.assignedTechnician,
+                        orderId: order.id,
+                        service: order.service, // Added service for context
+                        time: new Date().toLocaleString('en-MY', {
+                            timeZone: 'Asia/Kuala_Lumpur'
+                        }),
+                        type: "customer"
                     })
                 });
 
-                toast.success("Job completed and customer notified!");
-                router.refresh();
+                if (emailResponse.ok) {
+                    toast.success("Job completed and customer notified via email!");
+                } else {
+                    toast.success("Job completed!");
+                    toast.warning("Failed to send email notification");
+                }
 
-                // Clear WhatsApp messages after a delay
-                clearMessages();
+                router.refresh();
 
             } catch (error) {
                 console.error("Error completing job:", error);
                 toast.error("Failed to complete job");
             }
-        } else {
-            toast.error("You are not authorized to complete jobs");
         }
     };
 
@@ -131,15 +134,6 @@ export default function JobsPage() {
         getOrders();
     }, [user]);
 
-    useEffect(() => {
-        if (whatsappError) {
-            toast.error(`WhatsApp Error: ${whatsappError}`);
-        }
-        if (whatsappSuccess) {
-            toast.success(whatsappSuccess);
-        }
-    }, [whatsappError, whatsappSuccess]);
-
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[200px]">
@@ -156,12 +150,6 @@ export default function JobsPage() {
                     {orders.length} {orders.length === 1 ? 'job' : 'jobs'}
                 </div>
             </div>
-
-            {whatsappLoading && (
-                <div className="text-center py-12">
-                    <p className="text-muted-foreground">Sending WhatsApp message...</p>
-                </div>
-            )}
 
             {orders.length === 0 ? (
                 <div className="text-center py-12">
@@ -198,7 +186,7 @@ export default function JobsPage() {
                                 </div>
                             </CardContent>
                             <CardFooter>
-                                
+
                                 {order.status === "PENDING" && (
                                     <Button onClick={() => takeJobHandler(order.id)}>Take Job</Button>
                                 )}

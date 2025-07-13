@@ -20,10 +20,12 @@ import { useAuth } from "@/app/context/auth-context";
 import { db } from "@/firebase/root";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
+import { generateOrderId } from "@/lib/orderId";
 
 // Enhanced validation schema
 const formSchema = z.object({
     customerName: z.string().min(2, "Customer name must be at least 2 characters"),
+    customerEmail: z.string().email("Please enter a valid email address"),
     phone: z.string()
         .min(10, "Phone number must be at least 10 digits")
         .regex(/^[\+]?[1-9][\d]{0,15}$/, "Please enter a valid phone number"),
@@ -56,6 +58,7 @@ export default function SubmitOrderPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             customerName: "",
+            customerEmail: "",
             phone: "+6",
             address: "",
             service: undefined,
@@ -79,6 +82,7 @@ export default function SubmitOrderPage() {
             // Prepare order data for Firestore
             const orderData = {
                 ...data,
+                orderID: generateOrderId(),
                 quotedPrice: parseFloat(data.quotedPrice),
                 submittedBy: user.uid,
                 submittedByEmail: user.email,
@@ -157,11 +161,35 @@ export default function SubmitOrderPage() {
 
                                 <FormField
                                     control={control}
+                                    name="customerEmail"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="flex items-center gap-1">
+                                                Email Address
+                                                <span className="text-red-500">*</span>
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="Enter your email address"
+                                                    type="email"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Service updates and notifications will be sent to this email address
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={control}
                                     name="phone"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="flex items-center gap-1">
-                                                WhatsApp Number
+                                                Phone Number
                                                 <span className="text-red-500">*</span>
                                             </FormLabel>
                                             <FormControl>
@@ -198,7 +226,7 @@ export default function SubmitOrderPage() {
                                                 />
                                             </FormControl>
                                             <FormDescription>
-                                                WhatsApp number for communication
+                                                Phone number for communication
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
