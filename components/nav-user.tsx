@@ -5,6 +5,7 @@ import {
   Bell,
   ChevronsUpDown,
   LogOut,
+  User2Icon,
 } from "lucide-react"
 
 import {
@@ -28,6 +29,9 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/app/context/auth-context"
+import { useState } from "react"
+import { ProfileDialog } from "./dialogs/profile"
+import { RoleDialog } from "./dialogs/role"
 
 export function NavUser({
   user,
@@ -39,35 +43,22 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const { logout, user: authUser } = useAuth()
+  const { logout, user: authUser, userRole } = useAuth()
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isRoleOpen, setIsRoleOpen] = useState(userRole === null)
+
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={authUser?.displayName || "NO NAME"} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{authUser?.displayName || "NO NAME"}</span>
-                <span className="truncate text-xs">{authUser?.email}</span>
-              </div>
-              <ChevronsUpDown className="ml-auto size-4" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+    <>
+      <ProfileDialog isOpen={isProfileOpen} setIsOpen={setIsProfileOpen} />
+      <RoleDialog isOpen={isRoleOpen} setIsOpen={setIsRoleOpen} />
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              >
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={authUser?.displayName || "NO NAME"} />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
@@ -76,27 +67,51 @@ export function NavUser({
                   <span className="truncate font-medium">{authUser?.displayName || "NO NAME"}</span>
                   <span className="truncate text-xs">{authUser?.email}</span>
                 </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
+                <ChevronsUpDown className="ml-auto size-4" />
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+              side={isMobile ? "bottom" : "right"}
+              align="end"
+              sideOffset={4}
+            >
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={user.avatar} alt={authUser?.displayName || "NO NAME"} />
+                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">{authUser?.displayName || "NO NAME"}</span>
+                    <span className="truncate text-xs">{authUser?.email}</span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => setIsRoleOpen(true)}>
+                  <BadgeCheck />
+                  Role
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsProfileOpen(true)}>
+                  <User2Icon />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Bell />
+                  Notifications
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout}>
+                <LogOut />
+                Log out
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout}>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </>
   )
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/app/context/auth-context";
-import { db } from "@/firebase";
+import { db } from "@/firebase/root";
 import { collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData, Timestamp } from "firebase/firestore";
 import { useEffect } from "react";
 import { useState } from "react";
