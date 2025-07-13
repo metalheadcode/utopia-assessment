@@ -82,7 +82,7 @@ export default function SubmitOrderPage() {
                 quotedPrice: parseFloat(data.quotedPrice),
                 submittedBy: user.uid,
                 submittedByEmail: user.email,
-                status: "pending",
+                status: "PENDING",
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp(),
             };

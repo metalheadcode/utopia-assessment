@@ -1,11 +1,13 @@
 "use client";
 
 import { useAuth } from "@/app/context/auth-context";
+import { useWhatsapp } from "@/app/context/whatsapp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { db } from "@/firebase/root";
-import { collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData, Timestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData, Timestamp, updateDoc, doc } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -28,15 +30,71 @@ interface Order {
 }
 
 export default function JobsPage() {
-    const { user } = useAuth();
+    const { user, userRole } = useAuth();
+    const { sendJobCompletionMessage, isLoading: whatsappLoading, error: whatsappError, success: whatsappSuccess, clearMessages } = useWhatsapp();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
-    const takeJobHandler = (id: string) => {
-        if (user) {
-            console.log(id);
+    const takeJobHandler = async (id: string) => {
+        if (userRole === "worker") {
+            if (user) {
+                // UPDATE ORDER STATUS TO "IN PROGRESS"
+                const orderRef = doc(db, "orders", id);
+                await updateDoc(orderRef, {
+                    status: "IN PROGRESS"
+                });
+                toast.success("Job taken successfully");
+                router.refresh();
+            }
+        } else {
+            toast.error("You are not authorized to take jobs");
         }
     }
+
+    const completeJobHandler = async (order: Order) => {
+        if (userRole === "worker" && user) {
+            try {
+                // Update order status in Firestore
+                const orderRef = doc(db, "orders", order.id);
+                await updateDoc(orderRef, {
+                    status: "COMPLETED",
+                    completedAt: new Date(),
+                    completedBy: user.uid
+                });
+
+                // Send WhatsApp notification
+                await sendJobCompletionMessage({
+                    customerName: order.customerName,
+                    customerPhone: order.phone,
+                    orderId: order.id,
+                    service: order.service,
+                    technicianName: order.assignedTechnician,
+                    // technicianPhone: "+60123456789", // Optional
+                    completedAt: new Date().toLocaleString('en-MY', {
+                        timeZone: 'Asia/Kuala_Lumpur',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                });
+
+                toast.success("Job completed and customer notified!");
+                router.refresh();
+
+                // Clear WhatsApp messages after a delay
+                clearMessages();
+
+            } catch (error) {
+                console.error("Error completing job:", error);
+                toast.error("Failed to complete job");
+            }
+        } else {
+            toast.error("You are not authorized to complete jobs");
+        }
+    };
 
     useEffect(() => {
         const getOrders = async () => {
@@ -73,6 +131,15 @@ export default function JobsPage() {
         getOrders();
     }, [user]);
 
+    useEffect(() => {
+        if (whatsappError) {
+            toast.error(`WhatsApp Error: ${whatsappError}`);
+        }
+        if (whatsappSuccess) {
+            toast.success(whatsappSuccess);
+        }
+    }, [whatsappError, whatsappSuccess]);
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[200px]">
@@ -89,6 +156,12 @@ export default function JobsPage() {
                     {orders.length} {orders.length === 1 ? 'job' : 'jobs'}
                 </div>
             </div>
+
+            {whatsappLoading && (
+                <div className="text-center py-12">
+                    <p className="text-muted-foreground">Sending WhatsApp message...</p>
+                </div>
+            )}
 
             {orders.length === 0 ? (
                 <div className="text-center py-12">
@@ -125,7 +198,14 @@ export default function JobsPage() {
                                 </div>
                             </CardContent>
                             <CardFooter>
-                                <Button onClick={() => takeJobHandler(order.id)}>Take Job</Button>
+                                
+                                {order.status === "PENDING" && (
+                                    <Button onClick={() => takeJobHandler(order.id)}>Take Job</Button>
+                                )}
+
+                                {order.status === "IN PROGRESS" && (
+                                    <Button onClick={() => completeJobHandler(order)}>Job Completed</Button>
+                                )}
                             </CardFooter>
                         </Card>
                     ))}

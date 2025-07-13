@@ -24,11 +24,11 @@ export interface AppData {
 
 // Order status types
 export type OrderStatus =
-    | "Pending"
-    | "In Progress"
-    | "Completed"
-    | "Cancelled"
-    | "On Hold";
+    | "PENDING"
+    | "IN PROGRESS"
+    | "COMPLETED"
+    | "CANCELLED"
+    | "ON HOLD";
 
 // Service types
 export type ServiceType =

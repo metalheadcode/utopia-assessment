@@ -19,6 +19,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useAuth } from "@/app/context/auth-context"
+import { useMemo } from "react"
 
 
 export interface SidebarData {
@@ -164,6 +166,19 @@ const data: SidebarData = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { userRole } = useAuth()
+
+  const roleLabel = useMemo(() => {
+    if (userRole === null) {
+      return []
+    }
+    if (userRole === "admin") {
+      return data.navMain
+    }
+    if (userRole === "worker") {
+      return data.navMain.filter(item => item.title === "Workers")
+    }
+  }, [userRole])
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -185,7 +200,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={roleLabel || []} />
         {/* <NavSecondary items={data.navSecondary} /> */}
       </SidebarContent>
       <SidebarFooter>
