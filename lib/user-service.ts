@@ -115,8 +115,8 @@ export class DelegationService {
             permissions,
             isActive: true,
             createdAt: serverTimestamp(),
-            expiresAt,
-            createdBy: adminUid
+            createdBy: adminUid,
+            ...(expiresAt && { expiresAt })
         };
 
         await setDoc(doc(delegationsCollection, delegationId), delegationData);
