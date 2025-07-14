@@ -12,6 +12,7 @@ import { useEffect, useCallback } from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { JobService } from "@/lib/job-service";
+import { UserService } from "@/lib/user-service";
 import { DelegationManagement } from "@/components/dialogs/delegation-management";
 
 // Define the Order type based on your form data
@@ -101,6 +102,46 @@ export default function JobsPage() {
                     type: "customer"
                 })
             });
+
+            // Send email notification to technician
+            try {
+                // Get technician's actual email from their profile
+                const technicianUid = currentImpersonation ? currentImpersonation.workerUid : user.uid;
+                const technicianProfile = await UserService.getUserProfile(technicianUid);
+                
+                if (technicianProfile?.email) {
+                    const technicianEmailResponse = await fetch('/api/email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            to: technicianProfile.email,
+                            subject: `Job Completed - Order #${order.id.slice(-8)}`,
+                            clientName: order.customerName,
+                            technicianName: technicianProfile.displayName,
+                            orderId: order.id,
+                            time: new Date().toLocaleString('en-MY', {
+                                timeZone: 'Asia/Kuala_Lumpur'
+                            }),
+                            type: "technician",
+                            completedBy: currentImpersonation ? `${user.email} (acting as ${technicianProfile.displayName})` : technicianProfile.displayName
+                        })
+                    });
+
+                    if (technicianEmailResponse.ok) {
+                        toast.success("Technician notified via email!");
+                    } else {
+                        toast.warning("Failed to send technician notification");
+                    }
+                } else {
+                    console.warn("No email found for technician profile");
+                    toast.warning("Technician email not found");
+                }
+            } catch (error) {
+                console.error("Error sending technician notification:", error);
+                toast.warning("Failed to send technician notification");
+            }
 
             const message = currentImpersonation
                 ? `Job completed successfully as ${currentImpersonation.workerUid}`
