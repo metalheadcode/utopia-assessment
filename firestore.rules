@@ -43,6 +43,7 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
       
       // Create: Only during initial setup, user must match auth uid
+      // Note: API endpoints use Admin SDK which bypasses these rules
       allow create: if isAuthenticated() && 
                        isOwner(userId) && 
                        resource == null &&

@@ -226,8 +226,8 @@ export default function JobsPage() {
             )}
 
             {orders.length === 0 ? (
-                <div className="text-center py-12">
-                    <p className="text-muted-foreground">No orders found. Create your first order!</p>
+                <div className="text-center py-12 h-full flex items-center justify-center border border-dashed border-gray-300 rounded-lg">
+                    <p className="text-muted-foreground">No jobs found. Ask admin or your supervisor to create a job for you.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

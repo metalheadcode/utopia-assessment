@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { UserService } from "@/lib/user-service";
 import { UserRole } from "@/types/global.d.types";
+import admin from 'firebase-admin';
+
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+        }),
+    });
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -22,14 +32,18 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Create user profile
-        await UserService.createUserProfile(
+        // Create user profile using Admin SDK (bypasses security rules)
+        const db = admin.firestore();
+        await db.collection('userProfiles').doc(uid).set({
             uid,
             email,
             displayName,
             role,
-            additionalData
-        );
+            isActive: true,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            ...additionalData
+        });
 
         return NextResponse.json({ 
             success: true, 

@@ -62,17 +62,17 @@ export function RoleDialog({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: 
             // ✅ FIXED: Call the appropriate role function based on selection
             switch (data.role) {
                 case "admin":
-                    await createAdminRole(user.uid)
+                    await createAdminRole(user.uid, user.email || "", user.displayName || "")
                     toast.success("You are now an admin!")
                     await refreshUserClaims()
                     break
                 case "worker":
-                    await createWorkerRole(user.uid)
+                    await createWorkerRole(user.uid, user.email || "", user.displayName || "")
                     toast.success("You are now a worker!")
                     await refreshUserClaims()
                     break
                 case "client":
-                    await createClientRole(user.uid)
+                    await createClientRole(user.uid, user.email || "", user.displayName || "")
                     toast.success("You are now a client!")
                     await refreshUserClaims()
                     break
