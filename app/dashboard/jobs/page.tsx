@@ -222,7 +222,7 @@ export default function JobsPage() {
         } finally {
             setLoading(false);
         }
-    }, [user, currentImpersonation]);
+    }, [user, currentImpersonation, userRole]);
 
     useEffect(() => {
         loadOrders();
