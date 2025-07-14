@@ -151,140 +151,164 @@ export default function SubmitOrderPage() {
     const adminNotes = watch("adminNotes") || "N/A";
 
     return (
-        <div className="grid grid-cols-12 gap-4 items-start">
-            <Card className="col-span-7 h-fit">
-                <CardHeader>
-                    <CardTitle>Submit New Order</CardTitle>
-                    <CardDescription>
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Submit New Order</h1>
+                    <p className="text-muted-foreground">
                         Create a new service order for air conditioning services
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Form {...form}>
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                            {/* Customer Information */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-medium">Customer Information</h3>
+                    </p>
+                </div>
 
-                                <FormField
-                                    control={control}
-                                    name="customerName"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-1">
-                                                Name
-                                                <span className="text-red-500">*</span>
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="Enter customer full name"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                Full name of the customer
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                <div className="flex items-center gap-2">
+                    {/* <CreateWorkerDialog />
+                    <Button
+                        onClick={handleRefresh}
+                        disabled={refreshing}
+                        variant="outline"
+                    >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </Button> */}
+                </div>
+            </div>
 
-                                <FormField
-                                    control={control}
-                                    name="customerEmail"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-1">
-                                                Email Address
-                                                <span className="text-red-500">*</span>
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="Enter your email address"
-                                                    type="email"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                Service updates and notifications will be sent to this email address
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+            {/* CONTENT START HERE */}
 
-                                <FormField
-                                    control={control}
-                                    name="phone"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-1">
-                                                Phone Number
-                                                <span className="text-red-500">*</span>
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="+60123456789"
-                                                    {...field}
-                                                    type="tel"
-                                                    pattern="^\+?[1-9]\d{0,15}$"
-                                                    onKeyDown={(e) => {
-                                                        // Allow: backspace, delete, tab, escape, enter, and navigation keys
-                                                        if ([8, 9, 27, 13, 46, 37, 39].indexOf(e.keyCode) !== -1 ||
-                                                            // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-                                                            (e.keyCode === 65 && e.ctrlKey === true) ||
-                                                            (e.keyCode === 67 && e.ctrlKey === true) ||
-                                                            (e.keyCode === 86 && e.ctrlKey === true) ||
-                                                            (e.keyCode === 88 && e.ctrlKey === true)) {
-                                                            return;
-                                                        }
-                                                        // Allow: +, numbers, and some special characters
-                                                        if ((e.keyCode >= 48 && e.keyCode <= 57) || // numbers
-                                                            e.keyCode === 43 || // plus sign
-                                                            e.keyCode === 45 || // minus sign
-                                                            e.keyCode === 32) { // space
-                                                            return;
-                                                        }
-                                                        // Prevent all other keys
-                                                        e.preventDefault();
-                                                    }}
-                                                    onChange={(e) => {
-                                                        // Remove any non-numeric characters except +, -, and spaces
-                                                        const value = e.target.value.replace(/[^\d+\-\s]/g, '');
-                                                        field.onChange(value);
-                                                    }}
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                Phone number for communication
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+            <div className="grid grid-cols-12 gap-4 items-start">
+                <Card className="col-span-7 h-fit">
+                    <CardHeader>
+                        <CardTitle>Submit New Order</CardTitle>
+                        <CardDescription>
+                            Create a new service order for air conditioning services
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Form {...form}>
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                                {/* Customer Information */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-medium">Customer Information</h3>
 
-                                <MalaysiaAddress
-                                    control={control}
-                                    name="address"
-                                />
-                            </div>
+                                    <FormField
+                                        control={control}
+                                        name="customerName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="flex items-center gap-1">
+                                                    Name
+                                                    <span className="text-red-500">*</span>
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="Enter customer full name"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Full name of the customer
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
-                            <Separator />
+                                    <FormField
+                                        control={control}
+                                        name="customerEmail"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="flex items-center gap-1">
+                                                    Email Address
+                                                    <span className="text-red-500">*</span>
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="Enter your email address"
+                                                        type="email"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Service updates and notifications will be sent to this email address
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
-                            {/* Service Information */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-medium">Service Information</h3>
+                                    <FormField
+                                        control={control}
+                                        name="phone"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="flex items-center gap-1">
+                                                    Phone Number
+                                                    <span className="text-red-500">*</span>
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="+60123456789"
+                                                        {...field}
+                                                        type="tel"
+                                                        pattern="^\+?[1-9]\d{0,15}$"
+                                                        onKeyDown={(e) => {
+                                                            // Allow: backspace, delete, tab, escape, enter, and navigation keys
+                                                            if ([8, 9, 27, 13, 46, 37, 39].indexOf(e.keyCode) !== -1 ||
+                                                                // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                                                                (e.keyCode === 65 && e.ctrlKey === true) ||
+                                                                (e.keyCode === 67 && e.ctrlKey === true) ||
+                                                                (e.keyCode === 86 && e.ctrlKey === true) ||
+                                                                (e.keyCode === 88 && e.ctrlKey === true)) {
+                                                                return;
+                                                            }
+                                                            // Allow: +, numbers, and some special characters
+                                                            if ((e.keyCode >= 48 && e.keyCode <= 57) || // numbers
+                                                                e.keyCode === 43 || // plus sign
+                                                                e.keyCode === 45 || // minus sign
+                                                                e.keyCode === 32) { // space
+                                                                return;
+                                                            }
+                                                            // Prevent all other keys
+                                                            e.preventDefault();
+                                                        }}
+                                                        onChange={(e) => {
+                                                            // Remove any non-numeric characters except +, -, and spaces
+                                                            const value = e.target.value.replace(/[^\d+\-\s]/g, '');
+                                                            field.onChange(value);
+                                                        }}
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Phone number for communication
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
-                                <FormField
-                                    control={control}
-                                    name="service"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-1">
-                                                Service Type
-                                                <span className="text-red-500">*</span>
-                                            </FormLabel>
-                                            {/* <FormControl>
+                                    <MalaysiaAddress
+                                        control={control}
+                                        name="address"
+                                    />
+                                </div>
+
+                                <Separator />
+
+                                {/* Service Information */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-medium">Service Information</h3>
+
+                                    <FormField
+                                        control={control}
+                                        name="service"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="flex items-center gap-1">
+                                                    Service Type
+                                                    <span className="text-red-500">*</span>
+                                                </FormLabel>
+                                                {/* <FormControl>
                                                 <select
                                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                                     {...field}
@@ -298,228 +322,229 @@ export default function SubmitOrderPage() {
                                                 </select>
                                             </FormControl> */}
 
-                                            <FormControl>
-                                                <Select
-                                                    value={field.value}
-                                                    onValueChange={field.onChange}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select a service type" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {serviceOptions.map((service) => (
-                                                            <SelectItem key={service} value={service}>
-                                                                {service}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormControl>
-                                            <FormDescription>
-                                                Type of service required
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                                <FormControl>
+                                                    <Select
+                                                        value={field.value}
+                                                        onValueChange={field.onChange}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select a service type" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {serviceOptions.map((service) => (
+                                                                <SelectItem key={service} value={service}>
+                                                                    {service}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Type of service required
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
-                                <FormField
-                                    control={control}
-                                    name="quotedPrice"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-1">
-                                                Quoted Price
-                                                <span className="text-red-500">*</span>
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="0.00"
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                Price quoted to the customer
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                    <FormField
+                                        control={control}
+                                        name="quotedPrice"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="flex items-center gap-1">
+                                                    Quoted Price
+                                                    <span className="text-red-500">*</span>
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="0.00"
+                                                        type="number"
+                                                        step="0.01"
+                                                        min="0"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Price quoted to the customer
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                <Separator />
+
+                                {/* Assignment Information */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-medium">Assignment Information</h3>
+
+                                    <FormField
+                                        control={control}
+                                        name="assignedTechnician"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="flex items-center gap-1">
+                                                    Assigned Technician
+                                                    <span className="text-red-500">*</span>
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Select
+                                                        value={field.value}
+                                                        onValueChange={field.onChange}
+                                                        disabled={loadingWorkers}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select a technician" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {loadingWorkers ? (
+                                                                <SelectItem value="loading" disabled>
+                                                                    Loading workers...
+                                                                </SelectItem>
+                                                            ) : workers.length === 0 ? (
+                                                                <SelectItem value="no-workers" disabled>
+                                                                    No workers available
+                                                                </SelectItem>
+                                                            ) : (
+                                                                workers.map((worker) => (
+                                                                    <SelectItem key={worker.uid} value={worker.uid}>
+                                                                        {worker.displayName} ({worker.email})
+                                                                    </SelectItem>
+                                                                ))
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Technician assigned to this order
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={control}
+                                        name="adminNotes"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Admin Notes</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="Additional notes or special instructions"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Optional notes for internal reference
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                {/* Error Display */}
+                                {submitError && (
+                                    <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                                        <p className="text-red-600 text-sm">{submitError}</p>
+                                    </div>
+                                )}
+
+                                {/* Form Actions */}
+                                <div className="flex gap-3 pt-4">
+                                    <Button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="flex-1"
+                                    >
+                                        {isSubmitting ? "Submitting..." : "Submit Order"}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => reset()}
+                                        disabled={isSubmitting}
+                                    >
+                                        Reset
+                                    </Button>
+                                </div>
+                            </form>
+                        </Form>
+                    </CardContent>
+                </Card>
+
+                <Card className="col-span-5 h-fit sticky top-5">
+                    <CardHeader>
+                        <CardTitle>Order Preview</CardTitle>
+                        <CardDescription>
+                            Live preview of your order details
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="text-sm font-medium text-muted-foreground mb-2">Customer Information</h3>
+                                <div className="space-y-2 grid grid-cols-2 grid-rows-auto gap-2">
+                                    <div className="col-span-1">
+                                        <Label className="text-xs text-muted-foreground">Name</Label>
+                                        <p className="font-medium">{customerName}</p>
+                                    </div>
+                                    <div className="col-span-1">
+                                        <Label className="text-xs text-muted-foreground">Phone</Label>
+                                        <p className="font-medium">{phone}</p>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <Label className="text-xs text-muted-foreground">Address</Label>
+                                        <p className="font-medium">{address}</p>
+                                    </div>
+                                </div>
                             </div>
 
                             <Separator />
 
-                            {/* Assignment Information */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-medium">Assignment Information</h3>
-
-                                <FormField
-                                    control={control}
-                                    name="assignedTechnician"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-1">
-                                                Assigned Technician
-                                                <span className="text-red-500">*</span>
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Select
-                                                    value={field.value}
-                                                    onValueChange={field.onChange}
-                                                    disabled={loadingWorkers}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select a technician" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {loadingWorkers ? (
-                                                            <SelectItem value="loading" disabled>
-                                                                Loading workers...
-                                                            </SelectItem>
-                                                        ) : workers.length === 0 ? (
-                                                            <SelectItem value="no-workers" disabled>
-                                                                No workers available
-                                                            </SelectItem>
-                                                        ) : (
-                                                            workers.map((worker) => (
-                                                                <SelectItem key={worker.uid} value={worker.uid}>
-                                                                    {worker.displayName} ({worker.email})
-                                                                </SelectItem>
-                                                            ))
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormControl>
-                                            <FormDescription>
-                                                Technician assigned to this order
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={control}
-                                    name="adminNotes"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Admin Notes</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="Additional notes or special instructions"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                Optional notes for internal reference
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
-                            {/* Error Display */}
-                            {submitError && (
-                                <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                                    <p className="text-red-600 text-sm">{submitError}</p>
-                                </div>
-                            )}
-
-                            {/* Form Actions */}
-                            <div className="flex gap-3 pt-4">
-                                <Button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="flex-1"
-                                >
-                                    {isSubmitting ? "Submitting..." : "Submit Order"}
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => reset()}
-                                    disabled={isSubmitting}
-                                >
-                                    Reset
-                                </Button>
-                            </div>
-                        </form>
-                    </Form>
-                </CardContent>
-            </Card>
-
-            <Card className="col-span-5 h-fit sticky top-5">
-                <CardHeader>
-                    <CardTitle>Order Preview</CardTitle>
-                    <CardDescription>
-                        Live preview of your order details
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        <div>
-                            <h3 className="text-sm font-medium text-muted-foreground mb-2">Customer Information</h3>
-                            <div className="space-y-2 grid grid-cols-2 grid-rows-auto gap-2">
-                                <div className="col-span-1">
-                                    <Label className="text-xs text-muted-foreground">Name</Label>
-                                    <p className="font-medium">{customerName}</p>
-                                </div>
-                                <div className="col-span-1">
-                                    <Label className="text-xs text-muted-foreground">Phone</Label>
-                                    <p className="font-medium">{phone}</p>
-                                </div>
-                                <div className="col-span-2">
-                                    <Label className="text-xs text-muted-foreground">Address</Label>
-                                    <p className="font-medium">{address}</p>
+                            <div>
+                                <h3 className="text-sm font-medium text-muted-foreground mb-2">Order Details</h3>
+                                <div className="space-y-2">
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Service</Label>
+                                        <p className="font-medium">{service}</p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Quoted Price</Label>
+                                        <p className="font-medium">{quotedPrice}</p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Assigned Technician</Label>
+                                        <p className="font-medium">{assignedTechnician}</p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Admin Notes</Label>
+                                        <p className="font-medium">{adminNotes}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <Separator />
-
-                        <div>
-                            <h3 className="text-sm font-medium text-muted-foreground mb-2">Order Details</h3>
-                            <div className="space-y-2">
-                                <div>
-                                    <Label className="text-xs text-muted-foreground">Service</Label>
-                                    <p className="font-medium">{service}</p>
-                                </div>
-                                <div>
-                                    <Label className="text-xs text-muted-foreground">Quoted Price</Label>
-                                    <p className="font-medium">{quotedPrice}</p>
-                                </div>
-                                <div>
-                                    <Label className="text-xs text-muted-foreground">Assigned Technician</Label>
-                                    <p className="font-medium">{assignedTechnician}</p>
-                                </div>
-                                <div>
-                                    <Label className="text-xs text-muted-foreground">Admin Notes</Label>
-                                    <p className="font-medium">{adminNotes}</p>
-                                </div>
+                        {errors && Object.keys(errors).length > 0 &&
+                            <div className="space-y-2 mt-4">
+                                {Object.keys(errors).map((key) => (
+                                    <Alert key={key} variant="destructive">
+                                        <Terminal />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription>
+                                            {errors[key as keyof typeof errors]?.message}
+                                        </AlertDescription>
+                                    </Alert>
+                                ))}
                             </div>
-                        </div>
-                    </div>
-
-                    {errors && Object.keys(errors).length > 0 &&
-                        <div className="space-y-2 mt-4">
-                            {Object.keys(errors).map((key) => (
-                                <Alert key={key} variant="destructive">
-                                    <Terminal />
-                                    <AlertTitle>Error</AlertTitle>
-                                    <AlertDescription>
-                                        {errors[key as keyof typeof errors]?.message}
-                                    </AlertDescription>
-                                </Alert>
-                            ))}
-                        </div>
-                    }
-                    {/* ERROR END HERE  */}
-                </CardContent>
-            </Card>
+                        }
+                        {/* ERROR END HERE  */}
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }

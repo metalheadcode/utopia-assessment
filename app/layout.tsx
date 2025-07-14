@@ -34,7 +34,7 @@ export default function RootLayout({
         <AuthProvider>
           <WhatsappProvider>
             <EmailLinkHandler />
-            <main>{children}</main>
+            {children}
           </WhatsappProvider>
         </AuthProvider>
         <Toaster position="top-center" />

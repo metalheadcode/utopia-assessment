@@ -246,14 +246,13 @@ export default function JobsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold">Jobs</h1>
-                    {currentImpersonation && (
-                        <Badge variant="secondary" className="mt-1">
-                            Acting as: {getTechnicianName(currentImpersonation.workerUid)}
-                        </Badge>
-                    )}
+                    <h1 className="text-3xl font-bold tracking-tight">Jobs</h1>
+                    <p className="text-muted-foreground">
+                        View and manage your assigned jobs
+                    </p>
                 </div>
-                <div className="flex items-center gap-4">
+
+                <div className="flex items-center gap-2">
                     {userRole === 'admin' && <DelegationManagement />}
                     <div className="text-sm text-muted-foreground">
                         {orders.length} {orders.length === 1 ? 'job' : 'jobs'}
@@ -261,7 +260,7 @@ export default function JobsPage() {
                 </div>
             </div>
 
-            {/* Admin impersonation controls */}
+            {/* CONTENT START HERE */}
             {userRole === 'admin' && (
                 <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
                     <div className="flex items-center gap-2">

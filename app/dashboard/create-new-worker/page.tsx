@@ -9,13 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { UserPlus, Mail, User, ArrowLeft } from "lucide-react";
+import { UserPlus, User, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function CreateNewWorkerPage() {
     const { user, userRole, sendLoginLink } = useAuth();
     const router = useRouter();
-    
+
     const [formData, setFormData] = useState({
         email: "",
         displayName: "",
@@ -23,7 +23,6 @@ export default function CreateNewWorkerPage() {
         department: "Field Service"
     });
     const [loading, setLoading] = useState(false);
-    const [sendingLink, setSendingLink] = useState(false);
 
     // Redirect if not admin
     if (userRole !== 'admin') {
@@ -41,7 +40,7 @@ export default function CreateNewWorkerPage() {
 
     const handleCreateWorker = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!user) {
             toast.error("You must be logged in to create workers");
             return;
@@ -75,7 +74,9 @@ export default function CreateNewWorkerPage() {
 
             toast.success(`Worker account created successfully for ${formData.displayName}!`);
             toast.success(`Technician ID: ${result.technicianId}`);
-            
+
+            await handleSendLoginLink(formData.email);
+
             // Reset form
             setFormData({
                 email: "",
@@ -92,21 +93,18 @@ export default function CreateNewWorkerPage() {
         }
     };
 
-    const handleSendLoginLink = async () => {
-        if (!formData.email) {
+    const handleSendLoginLink = async (email: string) => {
+        if (!email) {
             toast.error("Please enter email address first");
             return;
         }
 
-        setSendingLink(true);
         try {
-            await sendLoginLink(formData.email);
-            toast.success(`Login link sent to ${formData.email}!`);
+            await sendLoginLink(email);
+            toast.success(`Login link sent to ${email}!`);
         } catch (error) {
             console.error("Error sending login link:", error);
             toast.error("Failed to send login link");
-        } finally {
-            setSendingLink(false);
         }
     };
 
@@ -212,7 +210,7 @@ export default function CreateNewWorkerPage() {
                 </Card>
 
                 {/* Send Login Link */}
-                <Card>
+                {/* <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Mail className="w-5 h-5" />
@@ -256,7 +254,7 @@ export default function CreateNewWorkerPage() {
                             </ul>
                         </div>
                     </CardContent>
-                </Card>
+                </Card> */}
             </div>
 
             {/* Quick Access */}

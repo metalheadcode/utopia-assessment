@@ -22,17 +22,16 @@ import {
 import { UserService } from "@/lib/user-service";
 import { UserProfile } from "@/types/global.d.types";
 import { toast } from "sonner";
-import { 
-    Search, 
-    MoreHorizontal, 
-    Eye, 
-    Edit, 
-    UserX, 
+import {
+    Search,
+    MoreHorizontal,
+    UserX,
     UserCheck,
     RefreshCw,
     Users
 } from "lucide-react";
 import { useAuth } from "@/app/context/auth-context";
+import { CreateWorkerDialog } from "@/components/dialogs/create-worker";
 
 export default function WorkerListPage() {
     const { userRole } = useAuth();
@@ -80,12 +79,12 @@ export default function WorkerListPage() {
         try {
             const newStatus = !worker.isActive;
             await UserService.updateUserProfile(worker.uid, { isActive: newStatus });
-            
+
             // Update local state
-            setWorkers(prev => prev.map(w => 
+            setWorkers(prev => prev.map(w =>
                 w.uid === worker.uid ? { ...w, isActive: newStatus } : w
             ));
-            
+
             toast.success(`Worker ${newStatus ? 'activated' : 'deactivated'} successfully`);
         } catch (error) {
             console.error("Error updating worker status:", error);
@@ -123,15 +122,20 @@ export default function WorkerListPage() {
                         Manage and view all technicians and workers in the system
                     </p>
                 </div>
-                <Button 
-                    onClick={handleRefresh} 
-                    disabled={refreshing}
-                    variant="outline"
-                >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                    Refresh
-                </Button>
+                <div className="flex items-center gap-2">
+                    <CreateWorkerDialog />
+                    <Button
+                        onClick={handleRefresh}
+                        disabled={refreshing}
+                        variant="outline"
+                    >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </Button>
+                </div>
             </div>
+
+            {/* CONTENT START HERE */}
 
             <Card>
                 <CardHeader>
@@ -172,8 +176,8 @@ export default function WorkerListPage() {
                                 {searchQuery ? 'No workers found' : 'No workers available'}
                             </h3>
                             <p className="text-muted-foreground mb-4">
-                                {searchQuery 
-                                    ? 'Try adjusting your search terms' 
+                                {searchQuery
+                                    ? 'Try adjusting your search terms'
                                     : 'Create your first worker to get started'
                                 }
                             </p>
@@ -219,7 +223,7 @@ export default function WorkerListPage() {
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            <Badge 
+                                            <Badge
                                                 variant={worker.isActive ? "default" : "secondary"}
                                                 className={worker.isActive ? "bg-green-100 text-green-800" : ""}
                                             >
@@ -237,14 +241,14 @@ export default function WorkerListPage() {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>
+                                                    {/* <DropdownMenuItem>
                                                         <Eye className="h-4 w-4 mr-2" />
                                                         View Details
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem>
                                                         <Edit className="h-4 w-4 mr-2" />
                                                         Edit Worker
-                                                    </DropdownMenuItem>
+                                                    </DropdownMenuItem> */}
                                                     <DropdownMenuItem
                                                         onClick={() => handleToggleStatus(worker)}
                                                         className={worker.isActive ? "text-red-600" : "text-green-600"}
