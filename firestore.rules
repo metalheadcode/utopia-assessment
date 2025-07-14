@@ -108,7 +108,7 @@ service cloud.firestore {
       // - Clients can read their own orders
       allow read: if isAuthenticated() && 
                      (isAdmin() || 
-                      (isWorker() && resource.data.submittedBy == request.auth.uid) ||
+                      (isWorker() && resource.data.assignedTechnician == request.auth.uid) ||
                       (isClient() && resource.data.submittedBy == request.auth.uid));
       
       // Create: Admins and clients can create orders
@@ -122,7 +122,7 @@ service cloud.firestore {
         isAdmin() ||
         
         // Worker can update their own assigned orders
-        (isWorker() && resource.data.submittedBy == request.auth.uid) ||
+        (isWorker() && resource.data.assignedTechnician == request.auth.uid) ||
          
         // Client can update their own orders (limited)
         (isClient() && resource.data.submittedBy == request.auth.uid)
