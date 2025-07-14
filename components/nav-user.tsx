@@ -1,7 +1,6 @@
 "use client"
 
 import {
-  BadgeCheck,
   Bell,
   ChevronsUpDown,
   LogOut,
@@ -31,7 +30,6 @@ import {
 import { useAuth } from "@/app/context/auth-context"
 import { useMemo, useState } from "react"
 import { ProfileDialog } from "./dialogs/profile"
-import { RoleDialog } from "./dialogs/role"
 
 export function NavUser({
   user,
@@ -45,11 +43,10 @@ export function NavUser({
   const { isMobile } = useSidebar()
   const { logout, user: authUser, userRole } = useAuth()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
-  const [isRoleOpen, setIsRoleOpen] = useState(userRole === null)
 
   const roleLabel = useMemo(() => {
     if (userRole === null) {
-      return "No role"
+      return "Contact admin for role assignment"
     }
     if (userRole === "admin") {
       return "Admin"
@@ -66,7 +63,6 @@ export function NavUser({
   return (
     <>
       <ProfileDialog isOpen={isProfileOpen} setIsOpen={setIsProfileOpen} />
-      <RoleDialog isOpen={isRoleOpen} setIsOpen={setIsRoleOpen} />
       <SidebarMenu>
         <SidebarMenuItem>
           <DropdownMenu>
@@ -106,10 +102,6 @@ export function NavUser({
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => setIsRoleOpen(true)}>
-                  <BadgeCheck />
-                  Role
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setIsProfileOpen(true)}>
                   <User2Icon />
                   Profile

@@ -117,7 +117,7 @@ export interface NavItem {
     children?: NavItem[];
 }
 
-// User types (for future authentication)
+// User types for authentication and profiles
 export interface User {
     id: string;
     name: string;
@@ -126,7 +126,66 @@ export interface User {
     avatar?: string;
 }
 
-export type UserRole = "admin" | "manager" | "technician" | "viewer";
+export type UserRole = "admin" | "worker" | "client";
+
+// Extended user profile stored in Firestore
+export interface UserProfile {
+    uid: string;                    // matches Firebase Auth UID
+    email: string;
+    displayName: string;
+    role: UserRole;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+
+    // Worker-specific fields
+    technicianId?: string;
+    department?: string;
+    supervisor?: string;            // Admin UID who can act on their behalf
+    phoneNumber?: string;
+
+    // Admin-specific fields  
+    managedWorkers?: string[];      // UIDs of workers this admin supervises
+}
+
+// Delegation system for admin acting as worker
+export interface WorkerDelegation {
+    id: string;
+    workerUid: string;
+    adminUid: string;
+    permissions: DelegationPermission[];
+    isActive: boolean;
+    createdAt: Date;
+    expiresAt?: Date;
+    createdBy: string;
+}
+
+export type DelegationPermission =
+    | "take_jobs"
+    | "complete_jobs"
+    | "update_job_status"
+    | "view_worker_jobs";
+
+// Audit trail for admin actions
+export interface AdminAction {
+    id: string;
+    adminUid: string;               // Who performed the action
+    targetUid?: string;             // Who was affected (for impersonation)
+    actionType: AdminActionType;
+    entityType: 'job' | 'order' | 'user' | 'delegation';
+    entityId: string;
+    details: Record<string, unknown>;
+    timestamp: Date;
+    ipAddress?: string;
+}
+
+export type AdminActionType =
+    | "job_taken_as_worker"
+    | "job_completed_as_worker"
+    | "delegation_created"
+    | "delegation_revoked"
+    | "user_created"
+    | "user_role_changed";
 
 // Theme types
 export interface Theme {

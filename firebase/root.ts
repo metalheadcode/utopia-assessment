@@ -22,6 +22,10 @@ const auth = getAuth(app);
 const postsCollection = collection(db, "posts");
 const commentsCollection = collection(db, "comments");
 const usersCollection = collection(db, "users");
+const userProfilesCollection = collection(db, "userProfiles");
+const delegationsCollection = collection(db, "delegations");
+const adminActionsCollection = collection(db, "adminActions");
+const ordersCollection = collection(db, "orders");
 
 export {
     app,
@@ -31,4 +35,8 @@ export {
     postsCollection,
     commentsCollection,
     usersCollection,
+    userProfilesCollection,
+    delegationsCollection,
+    adminActionsCollection,
+    ordersCollection,
 };

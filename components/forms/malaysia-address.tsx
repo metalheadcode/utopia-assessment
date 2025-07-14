@@ -8,6 +8,8 @@ import { FormMessage } from "../ui/form";
 import { Control } from "react-hook-form";
 import { useState } from "react";
 import { Input } from "../ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Label } from "../ui/label";
 
 // THE OUTCOME THE ADDRESS SHOULD LOOK LIKE THIS 
 // <unit>,<building | apartment | taman | complex>, <street>, <city>,<postcode> <state>
@@ -125,7 +127,7 @@ export default function MalaysiaAddress({ control, name }: MalaysiaAddressProps)
                         <div className="space-y-3">
                             {/* Unit Number */}
                             <div>
-                                <label className="text-sm font-medium mb-1 block">Unit Number</label>
+                                <Label className="text-sm font-medium mb-1 block">Unit Number</Label>
                                 <Input
                                     placeholder="e.g., 301, A-12-3"
                                     value={addressComponents.unit}
@@ -135,7 +137,7 @@ export default function MalaysiaAddress({ control, name }: MalaysiaAddressProps)
 
                             {/* Building/Complex Name */}
                             <div>
-                                <label className="text-sm font-medium mb-1 block">Building/Complex</label>
+                                <Label className="text-sm font-medium mb-1 block">Building/Complex</Label>
                                 <Input
                                     placeholder="e.g., Apartment Saujana, Taman Desa"
                                     value={addressComponents.building}
@@ -145,7 +147,7 @@ export default function MalaysiaAddress({ control, name }: MalaysiaAddressProps)
 
                             {/* Street Address */}
                             <div>
-                                <label className="text-sm font-medium mb-1 block">Street</label>
+                                <Label className="text-sm font-medium mb-1 block">Street</Label>
                                 <Input
                                     placeholder="e.g., Jalan PJU10/1C"
                                     value={addressComponents.street}
@@ -153,57 +155,68 @@ export default function MalaysiaAddress({ control, name }: MalaysiaAddressProps)
                                 />
                             </div>
 
-                            {/* State */}
-                            <div>
-                                <label className="text-sm font-medium mb-1 block">State <span className="text-red-500">*</span></label>
-                                <select
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    value={addressComponents.state}
-                                    onChange={(e) => handleStateChange(e.target.value, field.onChange)}
-                                >
-                                    <option value="">Select a state</option>
-                                    {getStates().map((state) => (
-                                        <option key={state} value={state}>
-                                            {state}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                            <div className="grid grid-cols-3 gap-4">
+                                {/* State */}
+                                <div className="col-span-1 w-full">
+                                    <Label className="text-sm font-medium mb-1 block">State <span className="text-red-500">*</span></Label>
+                                    <Select
+                                        value={addressComponents.state}
+                                        onValueChange={(value) => handleStateChange(value, field.onChange)}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select a state" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {getStates().map((state) => (
+                                                <SelectItem key={state} value={state}>
+                                                    {state}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                            {/* City */}
-                            <div>
-                                <label className="text-sm font-medium mb-1 block">City <span className="text-red-500">*</span></label>
-                                <select
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    value={addressComponents.city}
-                                    onChange={(e) => handleCityChange(e.target.value, field.onChange)}
-                                    disabled={!addressComponents.state}
-                                >
-                                    <option value="">Select a city</option>
-                                    {availableCities.map((city) => (
-                                        <option key={city} value={city}>
-                                            {city}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                                {/* City */}
+                                <div className="col-span-1 w-full">
+                                    <Label className="text-sm font-medium mb-1 block">City <span className="text-red-500">*</span></Label>
+                                    <Select
+                                        disabled={!addressComponents.state}
+                                        value={addressComponents.city}
+                                        onValueChange={(value) => handleCityChange(value, field.onChange)}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select a city" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableCities.map((city) => (
+                                                <SelectItem key={city} value={city}>
+                                                    {city}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                            {/* Postcode */}
-                            <div>
-                                <label className="text-sm font-medium mb-1 block">Postcode <span className="text-red-500">*</span></label>
-                                <select
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    value={addressComponents.postcode}
-                                    onChange={(e) => handlePostcodeChange(e.target.value, field.onChange)}
-                                    disabled={!addressComponents.city}
-                                >
-                                    <option value="">Select a postcode</option>
-                                    {availablePostcodes.map((postcode) => (
-                                        <option key={postcode} value={postcode}>
-                                            {postcode}
-                                        </option>
-                                    ))}
-                                </select>
+                                {/* Postcode */}
+                                <div className="col-span-1 w-full">
+                                    <Label className="text-sm font-medium mb-1 block">Postcode <span className="text-red-500">*</span></Label>
+                                    <Select
+                                        disabled={!addressComponents.city}
+                                        value={addressComponents.postcode}
+                                        onValueChange={(value) => handlePostcodeChange(value, field.onChange)}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select a postcode" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availablePostcodes.map((postcode) => (
+                                                <SelectItem key={postcode} value={postcode}>
+                                                    {postcode}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
 
                             {/* Preview of complete address */}
