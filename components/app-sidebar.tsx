@@ -71,6 +71,10 @@ const data: SidebarData = {
           title: "Create Worker",
           url: "/dashboard/create-new-worker",
         },
+        {
+          title: "Worker List",
+          url: "/dashboard/worker-list",
+        },
       ],
     },
     {

@@ -151,8 +151,8 @@ export default function SubmitOrderPage() {
     const adminNotes = watch("adminNotes") || "N/A";
 
     return (
-        <div className="grid grid-cols-2 gap-4 items-start">
-            <Card className="col-span-1 h-fit">
+        <div className="grid grid-cols-12 gap-4 items-start">
+            <Card className="col-span-7 h-fit">
                 <CardHeader>
                     <CardTitle>Submit New Order</CardTitle>
                     <CardDescription>
@@ -284,7 +284,7 @@ export default function SubmitOrderPage() {
                                                 Service Type
                                                 <span className="text-red-500">*</span>
                                             </FormLabel>
-                                            <FormControl>
+                                            {/* <FormControl>
                                                 <select
                                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                                     {...field}
@@ -296,6 +296,24 @@ export default function SubmitOrderPage() {
                                                         </option>
                                                     ))}
                                                 </select>
+                                            </FormControl> */}
+
+                                            <FormControl>
+                                                <Select
+                                                    value={field.value}
+                                                    onValueChange={field.onChange}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select a service type" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {serviceOptions.map((service) => (
+                                                            <SelectItem key={service} value={service}>
+                                                                {service}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
                                             </FormControl>
                                             <FormDescription>
                                                 Type of service required
@@ -348,8 +366,8 @@ export default function SubmitOrderPage() {
                                                 <span className="text-red-500">*</span>
                                             </FormLabel>
                                             <FormControl>
-                                                <Select 
-                                                    value={field.value} 
+                                                <Select
+                                                    value={field.value}
                                                     onValueChange={field.onChange}
                                                     disabled={loadingWorkers}
                                                 >
@@ -434,7 +452,7 @@ export default function SubmitOrderPage() {
                 </CardContent>
             </Card>
 
-            <Card className="col-span-1 h-fit sticky top-5">
+            <Card className="col-span-5 h-fit sticky top-5">
                 <CardHeader>
                     <CardTitle>Order Preview</CardTitle>
                     <CardDescription>
