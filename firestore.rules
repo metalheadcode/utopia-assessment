@@ -1,0 +1,176 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions for role checking
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      return request.auth.token.role;
+    }
+    
+    function isAdmin() {
+      return getUserRole() == 'admin';
+    }
+    
+    function isWorker() {
+      return getUserRole() == 'worker';
+    }
+    
+    function isClient() {
+      return getUserRole() == 'client';
+    }
+    
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+    
+    // Check if admin has delegation permission for a specific worker and action
+    function hasDelegationPermission(adminUid, workerUid, permission) {
+      let delegationId = adminUid + '_' + workerUid;
+      return exists(/databases/$(database)/documents/delegations/$(delegationId)) &&
+             get(/databases/$(database)/documents/delegations/$(delegationId)).data.isActive == true && 
+             get(/databases/$(database)/documents/delegations/$(delegationId)).data.permissions.hasAny([permission]) &&
+             (get(/databases/$(database)/documents/delegations/$(delegationId)).data.expiresAt == null || 
+              get(/databases/$(database)/documents/delegations/$(delegationId)).data.expiresAt > request.time);
+    }
+    
+    // USER PROFILES
+    match /userProfiles/{userId} {
+      // Read: Users can read their own profile, admins can read all
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      
+      // Create: Only during initial setup, user must match auth uid
+      // Note: API endpoints use Admin SDK which bypasses these rules
+      allow create: if isAuthenticated() && 
+                       isOwner(userId) && 
+                       resource == null &&
+                       request.resource.data.uid == request.auth.uid &&
+                       request.resource.data.email == request.auth.token.email;
+      
+      // Update: Users can update their own profile, admins can update any
+      allow update: if isAuthenticated() && 
+                       (isOwner(userId) || isAdmin()) &&
+                       // Cannot change uid or role (except admin changing role)
+                       request.resource.data.uid == resource.data.uid &&
+                       (request.resource.data.role == resource.data.role || isAdmin());
+      
+      // Delete: Only admins can delete profiles
+      allow delete: if isAdmin();
+    }
+    
+    // WORKER DELEGATIONS
+    match /delegations/{delegationId} {
+      // Read: Admin who created it, or the target worker
+      allow read: if isAuthenticated() && 
+                     (isOwner(resource.data.adminUid) || 
+                      isOwner(resource.data.workerUid) ||
+                      isAdmin());
+      
+      // Create: Only admins can create delegations
+      allow create: if isAdmin() && 
+                       request.resource.data.adminUid == request.auth.uid &&
+                       request.resource.data.createdBy == request.auth.uid &&
+                       request.resource.data.isActive == true;
+      
+      // Update: Only the admin who created it can update (mainly to revoke)
+      allow update: if isAdmin() && 
+                       isOwner(resource.data.adminUid) &&
+                       // Cannot change core fields, only isActive and updatedAt
+                       request.resource.data.adminUid == resource.data.adminUid &&
+                       request.resource.data.workerUid == resource.data.workerUid &&
+                       request.resource.data.createdBy == resource.data.createdBy;
+      
+      // Delete: Only the admin who created it
+      allow delete: if isAdmin() && isOwner(resource.data.adminUid);
+    }
+    
+    // ADMIN ACTIONS (Audit Trail)
+    match /adminActions/{actionId} {
+      // Read: Only admins can read audit logs
+      allow read: if isAdmin();
+      
+      // Create: Only admins can create audit entries
+      allow create: if isAdmin() && 
+                       request.resource.data.adminUid == request.auth.uid;
+      
+      // Update/Delete: No updates or deletes allowed (immutable audit trail)
+      allow update, delete: if false;
+    }
+    
+    // ORDERS
+    match /orders/{orderId} {
+      // Read: 
+      // - Admins can read all orders
+      // - Workers can read orders assigned to them
+      // - Clients can read their own orders
+      allow read: if isAuthenticated() && 
+                     (isAdmin() || 
+                      (isWorker() && resource.data.submittedBy == request.auth.uid) ||
+                      (isClient() && resource.data.submittedBy == request.auth.uid));
+      
+      // Create: Admins and clients can create orders
+      allow create: if isAuthenticated() && 
+                       (isAdmin() || isClient()) &&
+                       request.resource.data.submittedBy == request.auth.uid;
+      
+      // Update: Job status updates
+      allow update: if isAuthenticated() && (
+        // Admin can update any order
+        isAdmin() ||
+        
+        // Worker can update their own assigned orders
+        (isWorker() && resource.data.submittedBy == request.auth.uid) ||
+         
+        // Client can update their own orders (limited)
+        (isClient() && resource.data.submittedBy == request.auth.uid)
+      );
+      
+      // Delete: Only admins can delete orders
+      allow delete: if isAdmin();
+    }
+    
+    // JOB ACTIONS WITH DELEGATION SUPPORT
+    // Note: These rules are additive to the general order update rules above
+    match /orders/{orderId} {
+      // Special rules for job actions with admin delegation
+      allow update: if isAuthenticated() && isAdmin() && (
+        // Admin taking job as worker
+        (request.resource.data.status == 'IN PROGRESS' && 
+         resource.data.status == 'PENDING' &&
+         hasDelegationPermission(request.auth.uid, resource.data.submittedBy, 'take_jobs')) ||
+         
+        // Admin completing job as worker  
+        (request.resource.data.status == 'COMPLETED' && 
+         resource.data.status == 'IN PROGRESS' &&
+         hasDelegationPermission(request.auth.uid, resource.data.submittedBy, 'complete_jobs')) ||
+         
+        // Admin updating job status as worker
+        (request.resource.data.status != resource.data.status &&
+         hasDelegationPermission(request.auth.uid, resource.data.submittedBy, 'update_job_status'))
+      );
+    }
+    
+    // LEGACY COLLECTIONS (if needed)
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    match /posts/{postId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isAdmin();
+    }
+    
+    match /comments/{commentId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    
+    // CATCH-ALL: Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

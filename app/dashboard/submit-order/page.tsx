@@ -7,11 +7,17 @@ import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
-import dummyJson from "@/data/dummy.json";
-import { Technician } from "@/types/global.d.types";
+import { useState, useEffect } from "react";
+import { UserProfile } from "@/types/global.d.types";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import MalaysiaAddress from "@/components/forms/malaysia-address";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -21,6 +27,7 @@ import { db } from "@/firebase/root";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { generateOrderId } from "@/lib/orderId";
+import { UserService } from "@/lib/user-service";
 
 // Enhanced validation schema
 const formSchema = z.object({
@@ -51,6 +58,8 @@ const serviceOptions = [
 export default function SubmitOrderPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
+    const [workers, setWorkers] = useState<UserProfile[]>([]);
+    const [loadingWorkers, setLoadingWorkers] = useState(true);
     const { user } = useAuth();
     const router = useRouter();
 
@@ -69,6 +78,24 @@ export default function SubmitOrderPage() {
     });
 
     const { control, handleSubmit, reset, watch, formState: { errors } } = form;
+
+    // Load workers on component mount
+    useEffect(() => {
+        loadWorkers();
+    }, []);
+
+    const loadWorkers = async () => {
+        try {
+            setLoadingWorkers(true);
+            const allWorkers = await UserService.getAllWorkers();
+            setWorkers(allWorkers);
+        } catch (error) {
+            console.error("Error loading workers:", error);
+            toast.error("Failed to load workers. Please refresh the page.");
+        } finally {
+            setLoadingWorkers(false);
+        }
+    };
 
     const onSubmit = async (data: FormData) => {
         setIsSubmitting(true);
@@ -117,12 +144,15 @@ export default function SubmitOrderPage() {
     const address = watch("address") || "N/A";
     const service = watch("service") || "N/A";
     const quotedPrice = watch("quotedPrice") || "N/A";
-    const assignedTechnician = watch("assignedTechnician") || "N/A";
+    const assignedTechnicianUid = watch("assignedTechnician") || "";
+    const assignedTechnician = assignedTechnicianUid
+        ? workers.find(w => w.uid === assignedTechnicianUid)?.displayName || "N/A"
+        : "N/A";
     const adminNotes = watch("adminNotes") || "N/A";
 
     return (
-        <div className="grid grid-cols-2 gap-4 items-start">
-            <Card className="col-span-1 h-fit">
+        <div className="grid grid-cols-12 gap-4 items-start">
+            <Card className="col-span-7 h-fit">
                 <CardHeader>
                     <CardTitle>Submit New Order</CardTitle>
                     <CardDescription>
@@ -254,7 +284,7 @@ export default function SubmitOrderPage() {
                                                 Service Type
                                                 <span className="text-red-500">*</span>
                                             </FormLabel>
-                                            <FormControl>
+                                            {/* <FormControl>
                                                 <select
                                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                                     {...field}
@@ -266,6 +296,24 @@ export default function SubmitOrderPage() {
                                                         </option>
                                                     ))}
                                                 </select>
+                                            </FormControl> */}
+
+                                            <FormControl>
+                                                <Select
+                                                    value={field.value}
+                                                    onValueChange={field.onChange}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select a service type" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {serviceOptions.map((service) => (
+                                                            <SelectItem key={service} value={service}>
+                                                                {service}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
                                             </FormControl>
                                             <FormDescription>
                                                 Type of service required
@@ -318,17 +366,32 @@ export default function SubmitOrderPage() {
                                                 <span className="text-red-500">*</span>
                                             </FormLabel>
                                             <FormControl>
-                                                <select
-                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                                    {...field}
+                                                <Select
+                                                    value={field.value}
+                                                    onValueChange={field.onChange}
+                                                    disabled={loadingWorkers}
                                                 >
-                                                    <option value="">Select a technician</option>
-                                                    {dummyJson.technicians.map((tech: Technician) => (
-                                                        <option key={tech.name} value={tech.name}>
-                                                            {tech.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select a technician" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {loadingWorkers ? (
+                                                            <SelectItem value="loading" disabled>
+                                                                Loading workers...
+                                                            </SelectItem>
+                                                        ) : workers.length === 0 ? (
+                                                            <SelectItem value="no-workers" disabled>
+                                                                No workers available
+                                                            </SelectItem>
+                                                        ) : (
+                                                            workers.map((worker) => (
+                                                                <SelectItem key={worker.uid} value={worker.uid}>
+                                                                    {worker.displayName} ({worker.email})
+                                                                </SelectItem>
+                                                            ))
+                                                        )}
+                                                    </SelectContent>
+                                                </Select>
                                             </FormControl>
                                             <FormDescription>
                                                 Technician assigned to this order
@@ -389,7 +452,7 @@ export default function SubmitOrderPage() {
                 </CardContent>
             </Card>
 
-            <Card className="col-span-1 h-fit sticky top-5">
+            <Card className="col-span-5 h-fit sticky top-5">
                 <CardHeader>
                     <CardTitle>Order Preview</CardTitle>
                     <CardDescription>

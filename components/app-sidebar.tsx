@@ -67,6 +67,14 @@ const data: SidebarData = {
           title: "Orders",
           url: "/dashboard/orders",
         },
+        {
+          title: "Create Worker",
+          url: "/dashboard/create-new-worker",
+        },
+        {
+          title: "Worker List",
+          url: "/dashboard/worker-list",
+        },
       ],
     },
     {
@@ -78,11 +86,7 @@ const data: SidebarData = {
         {
           title: "Jobs",
           url: "/dashboard/jobs",
-        },
-        {
-          title: "Settings",
-          url: "/dashboard/settings",
-        },
+        }
       ],
     },
     // {

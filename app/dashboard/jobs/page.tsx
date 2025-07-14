@@ -4,12 +4,16 @@ import { useAuth } from "@/app/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { db } from "@/firebase/root";
-import { collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData, Timestamp, updateDoc, doc } from "firebase/firestore";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData, Timestamp } from "firebase/firestore";
+import { useEffect, useCallback } from "react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { JobService } from "@/lib/job-service";
+import { UserService } from "@/lib/user-service";
+import { DelegationManagement } from "@/components/dialogs/delegation-management";
 
 // Define the Order type based on your form data
 interface Order {
@@ -30,109 +34,171 @@ interface Order {
 }
 
 export default function JobsPage() {
-    const { user, userRole } = useAuth();
+    const {
+        user,
+        userRole,
+        availableDelegations,
+        currentImpersonation,
+        startImpersonation,
+        stopImpersonation,
+        canPerformAction
+    } = useAuth();
 
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
-    const router = useRouter();
 
     const takeJobHandler = async (id: string) => {
-        if (userRole === "worker") {
-            if (user) {
-                // UPDATE ORDER STATUS TO "IN PROGRESS"
-                const orderRef = doc(db, "orders", id);
-                await updateDoc(orderRef, {
-                    status: "IN PROGRESS"
-                });
-                toast.success("Job taken successfully");
-                router.refresh();
-            }
-        } else {
-            toast.error("You are not authorized to take jobs");
+        if (!user) return;
+
+        try {
+            const context = {
+                adminUid: currentImpersonation ? user.uid : undefined,
+                workerUid: currentImpersonation ? currentImpersonation.workerUid : user.uid,
+                isImpersonation: !!currentImpersonation
+            };
+
+            await JobService.takeJob(id, context);
+
+            const message = currentImpersonation
+                ? `Job taken successfully as ${currentImpersonation.workerUid}`
+                : "Job taken successfully";
+
+            toast.success(message);
+            await loadOrders(); // Refresh orders
+        } catch (error) {
+            console.error("Error taking job:", error);
+            toast.error(error instanceof Error ? error.message : "Failed to take job");
         }
     }
 
     const completeJobHandler = async (order: Order) => {
-        if (userRole === "worker" && user) {
+        if (!user) return;
+
+        try {
+            const context = {
+                adminUid: currentImpersonation ? user.uid : undefined,
+                workerUid: currentImpersonation ? currentImpersonation.workerUid : user.uid,
+                isImpersonation: !!currentImpersonation
+            };
+
+            await JobService.completeJob(order.id, context);
+
+            // Send email notification
+            const emailResponse = await fetch('/api/email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    to: order.customerEmail,
+                    subject: `Job Completed - Order #${order.id.slice(-8)}`,
+                    clientName: order.customerName,
+                    technicianName: order.assignedTechnician,
+                    orderId: order.id,
+                    service: order.service,
+                    time: new Date().toLocaleString('en-MY', {
+                        timeZone: 'Asia/Kuala_Lumpur'
+                    }),
+                    type: "customer"
+                })
+            });
+
+            // Send email notification to technician
             try {
-                // Update order status
-                const orderRef = doc(db, "orders", order.id);
-                await updateDoc(orderRef, {
-                    status: "COMPLETED",
-                    completedAt: new Date(),
-                    completedBy: user.uid
-                });
+                // Get technician's actual email from their profile
+                const technicianUid = currentImpersonation ? currentImpersonation.workerUid : user.uid;
+                const technicianProfile = await UserService.getUserProfile(technicianUid);
+                
+                if (technicianProfile?.email) {
+                    const technicianEmailResponse = await fetch('/api/email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            to: technicianProfile.email,
+                            subject: `Job Completed - Order #${order.id.slice(-8)}`,
+                            clientName: order.customerName,
+                            technicianName: technicianProfile.displayName,
+                            orderId: order.id,
+                            time: new Date().toLocaleString('en-MY', {
+                                timeZone: 'Asia/Kuala_Lumpur'
+                            }),
+                            type: "technician",
+                            completedBy: currentImpersonation ? `${user.email} (acting as ${technicianProfile.displayName})` : technicianProfile.displayName
+                        })
+                    });
 
-                // Send email notification
-                const emailResponse = await fetch('/api/email', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        to: order.customerEmail, // Customer email
-                        subject: `Job Completed - Order #${order.id.slice(-8)}`,
-                        clientName: order.customerName,
-                        technicianName: order.assignedTechnician,
-                        orderId: order.id,
-                        service: order.service, // Added service for context
-                        time: new Date().toLocaleString('en-MY', {
-                            timeZone: 'Asia/Kuala_Lumpur'
-                        }),
-                        type: "customer"
-                    })
-                });
-
-                if (emailResponse.ok) {
-                    toast.success("Job completed and customer notified via email!");
+                    if (technicianEmailResponse.ok) {
+                        toast.success("Technician notified via email!");
+                    } else {
+                        toast.warning("Failed to send technician notification");
+                    }
                 } else {
-                    toast.success("Job completed!");
-                    toast.warning("Failed to send email notification");
+                    console.warn("No email found for technician profile");
+                    toast.warning("Technician email not found");
                 }
-
-                router.refresh();
-
             } catch (error) {
-                console.error("Error completing job:", error);
-                toast.error("Failed to complete job");
+                console.error("Error sending technician notification:", error);
+                toast.warning("Failed to send technician notification");
             }
+
+            const message = currentImpersonation
+                ? `Job completed successfully as ${currentImpersonation.workerUid}`
+                : "Job completed successfully";
+
+            if (emailResponse.ok) {
+                toast.success(message + " and customer notified via email!");
+            } else {
+                toast.success(message);
+                toast.warning("Failed to send email notification");
+            }
+
+            await loadOrders(); // Refresh orders
+
+        } catch (error) {
+            console.error("Error completing job:", error);
+            toast.error(error instanceof Error ? error.message : "Failed to complete job");
         }
     };
 
+    const loadOrders = useCallback(async () => {
+        if (!user) {
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            // If admin and impersonating, show jobs for that worker
+            // If worker or admin not impersonating, show own jobs
+            const targetUid = currentImpersonation ? currentImpersonation.workerUid : user.uid;
+
+            const ordersCollection = collection(db, "orders");
+            const q = query(
+                ordersCollection,
+                where("submittedBy", "==", targetUid)
+            );
+
+            const querySnapshot = await getDocs(q);
+            const ordersData = querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+                id: doc.id,
+                ...doc.data()
+            })) as Order[];
+
+            setOrders(ordersData);
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            toast.error('Error fetching orders');
+        } finally {
+            setLoading(false);
+        }
+    }, [user, currentImpersonation]);
+
     useEffect(() => {
-        const getOrders = async () => {
-            if (!user) {
-                setLoading(false);
-                return;
-            }
-
-            try {
-                setLoading(true);
-                const ordersCollection = collection(db, "orders");
-
-                // Query orders where the current user is the submitter
-                const q = query(
-                    ordersCollection,
-                    where("submittedBy", "==", user.uid)
-                );
-
-                const querySnapshot = await getDocs(q);
-                const ordersData = querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
-                    id: doc.id,
-                    ...doc.data()
-                })) as Order[];
-
-                setOrders(ordersData);
-            } catch (error) {
-                console.error('Error fetching orders:', error);
-                toast.error('Error fetching orders');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        getOrders();
-    }, [user]);
+        loadOrders();
+    }, [user, currentImpersonation, loadOrders]);
 
     if (loading) {
         return (
@@ -145,15 +211,64 @@ export default function JobsPage() {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Jobs</h1>
-                <div className="text-sm text-muted-foreground">
-                    {orders.length} {orders.length === 1 ? 'job' : 'jobs'}
+                <div>
+                    <h1 className="text-2xl font-bold">Jobs</h1>
+                    {currentImpersonation && (
+                        <Badge variant="secondary" className="mt-1">
+                            Acting as worker: {currentImpersonation.workerUid}
+                        </Badge>
+                    )}
+                </div>
+                <div className="flex items-center gap-4">
+                    {userRole === 'admin' && <DelegationManagement />}
+                    <div className="text-sm text-muted-foreground">
+                        {orders.length} {orders.length === 1 ? 'job' : 'jobs'}
+                    </div>
                 </div>
             </div>
 
+            {/* Admin impersonation controls */}
+            {userRole === 'admin' && (
+                <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Act as worker:</span>
+                        <Select
+                            value={currentImpersonation?.id || "__none__"}
+                            onValueChange={(value) => {
+                                if (value === "__none__") {
+                                    stopImpersonation();
+                                } else {
+                                    const delegation = availableDelegations.find(d => d.id === value);
+                                    if (delegation) {
+                                        startImpersonation(delegation);
+                                    }
+                                }
+                            }}
+                        >
+                            <SelectTrigger className="w-[200px]">
+                                <SelectValue placeholder="Select worker" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="__none__">None (act as self)</SelectItem>
+                                {availableDelegations.map((delegation) => (
+                                    <SelectItem key={delegation.id} value={delegation.id}>
+                                        Worker: {delegation.workerUid}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {currentImpersonation && (
+                        <Badge variant="outline">
+                            Permissions: {currentImpersonation.permissions.join(', ')}
+                        </Badge>
+                    )}
+                </div>
+            )}
+
             {orders.length === 0 ? (
-                <div className="text-center py-12">
-                    <p className="text-muted-foreground">No orders found. Create your first order!</p>
+                <div className="text-center py-12 h-full flex items-center justify-center border border-dashed border-gray-300 rounded-lg">
+                    <p className="text-muted-foreground">No jobs found. Ask admin or your supervisor to create a job for you.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -185,14 +300,35 @@ export default function JobsPage() {
                                     </div>
                                 </div>
                             </CardContent>
-                            <CardFooter>
-
-                                {order.status === "PENDING" && (
-                                    <Button onClick={() => takeJobHandler(order.id)}>Take Job</Button>
+                            <CardFooter className="flex flex-col gap-2">
+                                {order.status === "PENDING" && canPerformAction("take_jobs") && (
+                                    <Button
+                                        onClick={() => takeJobHandler(order.id)}
+                                        className="w-full"
+                                    >
+                                        {currentImpersonation ? `Take Job as ${currentImpersonation.workerUid}` : "Take Job"}
+                                    </Button>
                                 )}
 
-                                {order.status === "IN PROGRESS" && (
-                                    <Button onClick={() => completeJobHandler(order)}>Job Completed</Button>
+                                {order.status === "IN PROGRESS" && canPerformAction("complete_jobs") && (
+                                    <Button
+                                        onClick={() => completeJobHandler(order)}
+                                        className="w-full"
+                                    >
+                                        {currentImpersonation ? `Complete Job as ${currentImpersonation.workerUid}` : "Job Completed"}
+                                    </Button>
+                                )}
+
+                                {/* Show admin action indicators */}
+                                {(order as Order & { takenByAdmin?: string }).takenByAdmin && (
+                                    <Badge variant="secondary" className="text-xs">
+                                        Taken by admin: {(order as Order & { takenByAdmin?: string }).takenByAdmin}
+                                    </Badge>
+                                )}
+                                {(order as Order & { completedByAdmin?: string }).completedByAdmin && (
+                                    <Badge variant="secondary" className="text-xs">
+                                        Completed by admin: {(order as Order & { completedByAdmin?: string }).completedByAdmin}
+                                    </Badge>
                                 )}
                             </CardFooter>
                         </Card>
