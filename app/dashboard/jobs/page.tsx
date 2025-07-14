@@ -3,9 +3,9 @@
 import { useAuth } from "@/app/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { db } from "@/firebase/root";
 import { collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData, Timestamp } from "firebase/firestore";
 import { useEffect, useCallback } from "react";
@@ -14,8 +14,9 @@ import { toast } from "sonner";
 import { JobService } from "@/lib/job-service";
 import { UserService } from "@/lib/user-service";
 import { DelegationManagement } from "@/components/dialogs/delegation-management";
+import { Clock, User, Wrench, Coins, Map, QuoteIcon } from "lucide-react";
 
-// Define the Order type based on your form data
+
 interface Order {
     id: string;
     customerName: string;
@@ -29,8 +30,8 @@ interface Order {
     submittedBy: string;
     submittedByEmail: string;
     status: string;
-    createdAt: Timestamp; // Firestore timestamp
-    updatedAt: Timestamp; // Firestore timestamp
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
 }
 
 export default function JobsPage() {
@@ -46,6 +47,21 @@ export default function JobsPage() {
 
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const [technicianNames, setTechnicianNames] = useState<Record<string, string>>({});
+
+    // Function to get technician display name
+    const getTechnicianName = (uid: string): string => {
+        return technicianNames[uid] || uid.slice(-6); // Fallback to last 6 chars of UID
+    };
+
+    // Function to get technician initials for avatar
+    // const getTechnicianInitials = (uid: string): string => {
+    //     const name = technicianNames[uid];
+    //     if (name) {
+    //         return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+    //     }
+    //     return uid.slice(-2).toUpperCase();
+    // };
 
     const takeJobHandler = async (id: string) => {
         if (!user) return;
@@ -60,7 +76,7 @@ export default function JobsPage() {
             await JobService.takeJob(id, context);
 
             const message = currentImpersonation
-                ? `Job taken successfully as ${currentImpersonation.workerUid}`
+                ? `Job taken successfully as ${getTechnicianName(currentImpersonation.workerUid)}`
                 : "Job taken successfully";
 
             toast.success(message);
@@ -108,7 +124,7 @@ export default function JobsPage() {
                 // Get technician's actual email from their profile
                 const technicianUid = currentImpersonation ? currentImpersonation.workerUid : user.uid;
                 const technicianProfile = await UserService.getUserProfile(technicianUid);
-                
+
                 if (technicianProfile?.email) {
                     const technicianEmailResponse = await fetch('/api/email', {
                         method: 'POST',
@@ -144,7 +160,7 @@ export default function JobsPage() {
             }
 
             const message = currentImpersonation
-                ? `Job completed successfully as ${currentImpersonation.workerUid}`
+                ? `Job completed successfully as ${getTechnicianName(currentImpersonation.workerUid)}`
                 : "Job completed successfully";
 
             if (emailResponse.ok) {
@@ -176,9 +192,11 @@ export default function JobsPage() {
             const targetUid = currentImpersonation ? currentImpersonation.workerUid : user.uid;
 
             const ordersCollection = collection(db, "orders");
+
+            // Workers should see jobs assigned to them, regardless of who created the order
             const q = query(
                 ordersCollection,
-                where("submittedBy", "==", targetUid)
+                where("assignedTechnician", "==", targetUid)
             );
 
             const querySnapshot = await getDocs(q);
@@ -187,6 +205,22 @@ export default function JobsPage() {
                 ...doc.data()
             })) as Order[];
 
+            // Fetch technician names for all unique technician UIDs
+            const uniqueTechnicianUids = [...new Set(ordersData.map(order => order.assignedTechnician))];
+            const namePromises = uniqueTechnicianUids.map(uid =>
+                UserService.getUserProfile(uid).then(profile => ({
+                    uid,
+                    name: profile?.displayName || `Tech-${uid.slice(-6)}`
+                }))
+            );
+
+            const technicianData = await Promise.all(namePromises);
+            const nameMap = technicianData.reduce((acc, { uid, name }) => {
+                acc[uid] = name;
+                return acc;
+            }, {} as Record<string, string>);
+
+            setTechnicianNames(nameMap);
             setOrders(ordersData);
         } catch (error) {
             console.error('Error fetching orders:', error);
@@ -212,14 +246,13 @@ export default function JobsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold">Jobs</h1>
-                    {currentImpersonation && (
-                        <Badge variant="secondary" className="mt-1">
-                            Acting as worker: {currentImpersonation.workerUid}
-                        </Badge>
-                    )}
+                    <h1 className="text-3xl font-bold tracking-tight">Jobs</h1>
+                    <p className="text-muted-foreground">
+                        View and manage your assigned jobs
+                    </p>
                 </div>
-                <div className="flex items-center gap-4">
+
+                <div className="flex items-center gap-2">
                     {userRole === 'admin' && <DelegationManagement />}
                     <div className="text-sm text-muted-foreground">
                         {orders.length} {orders.length === 1 ? 'job' : 'jobs'}
@@ -227,7 +260,7 @@ export default function JobsPage() {
                 </div>
             </div>
 
-            {/* Admin impersonation controls */}
+            {/* CONTENT START HERE */}
             {userRole === 'admin' && (
                 <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
                     <div className="flex items-center gap-2">
@@ -271,32 +304,61 @@ export default function JobsPage() {
                     <p className="text-muted-foreground">No jobs found. Ask admin or your supervisor to create a job for you.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {orders.map((order) => (
-                        <Card key={order.id}>
-                            <CardHeader>
-                                <CardTitle className="text-lg font-medium">{order.service}</CardTitle>
-                                <span className="text-sm text-muted-foreground">#{order.id.slice(-8)}</span>
-                            </CardHeader>
-                            <CardContent>
-                                <div>
-                                    <p className="text-xl text-muted-foreground">{order.adminNotes}</p>
+                        <Card key={order.id} className="hover:shadow-lg transition-shadow duration-200 border-0 shadow-sm">
+                            <CardHeader className="pb-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        {order.status === "PENDING" && (
+                                            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                                                <Clock className="w-3 h-3 mr-1" />
+                                                PENDING
+                                            </Badge>
+                                        )}
+                                        {order.status === "IN PROGRESS" && (
+                                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                                <Wrench className="w-3 h-3 mr-1" />
+                                                IN PROGRESS
+                                            </Badge>
+                                        )}
+                                        {order.status === "COMPLETED" && (
+                                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                                ✓ COMPLETED
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <span className="text-xs text-muted-foreground font-mono">#{order.id.slice(-8)}</span>
                                 </div>
+                                <CardTitle className="text-xl font-semibold text-gray-900 mt-2">{order.service.toUpperCase()}</CardTitle>
+                                {order.adminNotes && (
+                                    <div className="relative">
+                                        <QuoteIcon className="w-16 h-16 absolute inset-0 text-muted-foreground opacity-10" />
+                                        <p className="relative text-sm text-muted-foreground">{order.adminNotes}</p>
+                                    </div>
+                                )}
+                            </CardHeader>
+                            <CardContent className="">
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 ">
+                                        <div className="rounded-full bg-muted p-2">
+                                            <Coins className="w-4 h-4" />
+                                        </div>
+                                        <span className="text-green-600 text-sm">RM {order.quotedPrice}</span>
+                                    </div>
 
-                                <Separator className="my-4" />
+                                    <div className="flex items-center gap-2">
+                                        <div className="rounded-full bg-muted p-2">
+                                            <User className="w-4 h-4" />
+                                        </div>
+                                        <span className="text-sm text-black/60">{getTechnicianName(order.assignedTechnician)}</span>
+                                    </div>
 
-                                <div className="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <span className="text-muted-foreground">Service:</span> {order.service}
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">Price:</span> RM {order.quotedPrice}
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">Technician:</span> {order.assignedTechnician}
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">Status:</span> {order.status}
+                                    <div className="flex items-center gap-2">
+                                        <div className="rounded-full bg-muted p-2">
+                                            <Map className="w-4 h-4" />
+                                        </div>
+                                        <span className=" text-sm text-black/60">{order.address}</span>
                                     </div>
                                 </div>
                             </CardContent>
@@ -306,7 +368,7 @@ export default function JobsPage() {
                                         onClick={() => takeJobHandler(order.id)}
                                         className="w-full"
                                     >
-                                        {currentImpersonation ? `Take Job as ${currentImpersonation.workerUid}` : "Take Job"}
+                                        {currentImpersonation ? `Take Job as ${getTechnicianName(currentImpersonation.workerUid)}` : "Take Job"}
                                     </Button>
                                 )}
 
@@ -315,19 +377,19 @@ export default function JobsPage() {
                                         onClick={() => completeJobHandler(order)}
                                         className="w-full"
                                     >
-                                        {currentImpersonation ? `Complete Job as ${currentImpersonation.workerUid}` : "Job Completed"}
+                                        {currentImpersonation ? `Complete Job as ${getTechnicianName(currentImpersonation.workerUid)}` : "Mark Completed"}
                                     </Button>
                                 )}
 
                                 {/* Show admin action indicators */}
                                 {(order as Order & { takenByAdmin?: string }).takenByAdmin && (
                                     <Badge variant="secondary" className="text-xs">
-                                        Taken by admin: {(order as Order & { takenByAdmin?: string }).takenByAdmin}
+                                        Taken by admin: {getTechnicianName((order as Order & { takenByAdmin?: string }).takenByAdmin!)}
                                     </Badge>
                                 )}
                                 {(order as Order & { completedByAdmin?: string }).completedByAdmin && (
                                     <Badge variant="secondary" className="text-xs">
-                                        Completed by admin: {(order as Order & { completedByAdmin?: string }).completedByAdmin}
+                                        Completed by admin: {getTechnicianName((order as Order & { completedByAdmin?: string }).completedByAdmin!)}
                                     </Badge>
                                 )}
                             </CardFooter>

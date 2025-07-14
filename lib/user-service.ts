@@ -175,18 +175,23 @@ export class DelegationService {
 
     // Revoke delegation
     static async revokeDelegation(adminUid: string, delegationId: string): Promise<void> {
+        // Get the delegation first to extract workerUid for audit logging
+        const delegationDoc = await getDoc(doc(delegationsCollection, delegationId));
+        const delegation = delegationDoc.data() as WorkerDelegation;
+        
         await updateDoc(doc(delegationsCollection, delegationId), {
             isActive: false,
             updatedAt: serverTimestamp()
         });
 
-        // Log the admin action
+        // Log the admin action with proper targetUid
         await AuditService.logAdminAction(
             adminUid,
             "delegation_revoked",
             "delegation",
             delegationId,
-            { revoked: true }
+            { revoked: true },
+            delegation.workerUid  // Add the missing targetUid
         );
     }
 }

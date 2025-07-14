@@ -81,6 +81,7 @@ export function DelegationManagement() {
             toast.error("Failed to create delegation");
         } finally {
             setLoading(false);
+            setIsOpen(false);
         }
     };
 
@@ -94,6 +95,8 @@ export function DelegationManagement() {
         } catch (error) {
             console.error("Error revoking delegation:", error);
             toast.error("Failed to revoke delegation");
+        } finally {
+            setIsOpen(false);
         }
     };
 
@@ -156,7 +159,7 @@ export function DelegationManagement() {
                                             <Checkbox
                                                 id={permission.value}
                                                 checked={selectedPermissions.includes(permission.value)}
-                                                onCheckedChange={(checked) => 
+                                                onCheckedChange={(checked) =>
                                                     handlePermissionChange(permission.value, checked as boolean)
                                                 }
                                             />
@@ -176,8 +179,8 @@ export function DelegationManagement() {
                                 </div>
                             </div>
 
-                            <Button 
-                                onClick={handleCreateDelegation} 
+                            <Button
+                                onClick={handleCreateDelegation}
                                 disabled={loading || !selectedWorker || selectedPermissions.length === 0}
                                 className="w-full"
                             >

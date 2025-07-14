@@ -103,7 +103,7 @@ export class JobService {
     static async getWorkerJobs(workerUid: string) {
         const assignedJobsQuery = query(
             ordersCollection,
-            where("submittedBy", "==", workerUid)
+            where("assignedTechnician", "==", workerUid)
         );
         
         const querySnapshot = await getDocs(assignedJobsQuery);
