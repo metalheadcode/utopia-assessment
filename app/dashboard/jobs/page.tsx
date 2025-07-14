@@ -29,8 +29,8 @@ interface Order {
     submittedBy: string;
     submittedByEmail: string;
     status: string;
-    createdAt: Timestamp; // Firestore timestamp
-    updatedAt: Timestamp; // Firestore timestamp
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
 }
 
 export default function JobsPage() {
@@ -108,7 +108,7 @@ export default function JobsPage() {
                 // Get technician's actual email from their profile
                 const technicianUid = currentImpersonation ? currentImpersonation.workerUid : user.uid;
                 const technicianProfile = await UserService.getUserProfile(technicianUid);
-                
+
                 if (technicianProfile?.email) {
                     const technicianEmailResponse = await fetch('/api/email', {
                         method: 'POST',
@@ -176,9 +176,11 @@ export default function JobsPage() {
             const targetUid = currentImpersonation ? currentImpersonation.workerUid : user.uid;
 
             const ordersCollection = collection(db, "orders");
+
+            // Workers should see jobs assigned to them, regardless of who created the order
             const q = query(
                 ordersCollection,
-                where("submittedBy", "==", targetUid)
+                where("assignedTechnician", "==", targetUid)
             );
 
             const querySnapshot = await getDocs(q);
@@ -275,8 +277,23 @@ export default function JobsPage() {
                     {orders.map((order) => (
                         <Card key={order.id}>
                             <CardHeader>
+                                <div className="flex items-center gap-2">
+                                    {order.status === "PENDING" &&
+                                        <Badge variant="secondary" className="text-xs">
+                                            {order.status}
+                                        </Badge>}
+                                    {order.status === "IN PROGRESS" &&
+                                        <Badge variant="secondary" className="text-xs">
+                                            {order.status}
+                                        </Badge>}
+                                    {order.status === "COMPLETED" &&
+                                        <Badge variant="secondary" className="text-xs">
+                                            {order.status}
+                                        </Badge>}
+                                    <span className="text-sm text-muted-foreground">#{order.id.slice(-8)}</span>
+                                </div>
                                 <CardTitle className="text-lg font-medium">{order.service}</CardTitle>
-                                <span className="text-sm text-muted-foreground">#{order.id.slice(-8)}</span>
+
                             </CardHeader>
                             <CardContent>
                                 <div>
@@ -294,9 +311,6 @@ export default function JobsPage() {
                                     </div>
                                     <div>
                                         <span className="text-muted-foreground">Technician:</span> {order.assignedTechnician}
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">Status:</span> {order.status}
                                     </div>
                                 </div>
                             </CardContent>

@@ -125,33 +125,30 @@ service cloud.firestore {
         (isWorker() && resource.data.assignedTechnician == request.auth.uid) ||
          
         // Client can update their own orders (limited)
-        (isClient() && resource.data.submittedBy == request.auth.uid)
+        (isClient() && resource.data.submittedBy == request.auth.uid) ||
+        
+        // Admin delegation for job actions
+        (isAdmin() && (
+          // Admin taking job as worker
+          (request.resource.data.status == 'IN PROGRESS' && 
+           resource.data.status == 'PENDING' &&
+           hasDelegationPermission(request.auth.uid, resource.data.assignedTechnician, 'take_jobs')) ||
+           
+          // Admin completing job as worker  
+          (request.resource.data.status == 'COMPLETED' && 
+           resource.data.status == 'IN PROGRESS' &&
+           hasDelegationPermission(request.auth.uid, resource.data.assignedTechnician, 'complete_jobs')) ||
+           
+          // Admin updating job status as worker
+          (request.resource.data.status != resource.data.status &&
+           hasDelegationPermission(request.auth.uid, resource.data.assignedTechnician, 'update_job_status'))
+        ))
       );
       
       // Delete: Only admins can delete orders
       allow delete: if isAdmin();
     }
     
-    // JOB ACTIONS WITH DELEGATION SUPPORT
-    // Note: These rules are additive to the general order update rules above
-    match /orders/{orderId} {
-      // Special rules for job actions with admin delegation
-      allow update: if isAuthenticated() && isAdmin() && (
-        // Admin taking job as worker
-        (request.resource.data.status == 'IN PROGRESS' && 
-         resource.data.status == 'PENDING' &&
-         hasDelegationPermission(request.auth.uid, resource.data.submittedBy, 'take_jobs')) ||
-         
-        // Admin completing job as worker  
-        (request.resource.data.status == 'COMPLETED' && 
-         resource.data.status == 'IN PROGRESS' &&
-         hasDelegationPermission(request.auth.uid, resource.data.submittedBy, 'complete_jobs')) ||
-         
-        // Admin updating job status as worker
-        (request.resource.data.status != resource.data.status &&
-         hasDelegationPermission(request.auth.uid, resource.data.submittedBy, 'update_job_status'))
-      );
-    }
     
     // LEGACY COLLECTIONS (if needed)
     match /users/{userId} {
