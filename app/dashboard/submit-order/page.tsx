@@ -237,7 +237,7 @@ export default function SubmitOrderPage() {
                     customerId = result.customerId;
                     
                     // Send login link to customer
-                    await fetch('/api/send-customer-login-link', {
+                    const emailResponse = await fetch('/api/send-customer-login-link', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -246,7 +246,14 @@ export default function SubmitOrderPage() {
                         })
                     });
 
-                    toast.success("Customer account created and login link sent!");
+                    const emailResult = await emailResponse.json();
+                    
+                    if (!emailResponse.ok) {
+                        console.error("Failed to send login link:", emailResult);
+                        toast.warning(`Customer account created, but email sending failed: ${emailResult.error || 'Unknown error'}`);
+                    } else {
+                        toast.success("Customer account created and login link sent!");
+                    }
                 } catch (customerError) {
                     // If customer user creation fails, create customer record without Firebase Auth
                     console.warn("Customer user creation failed, creating customer record only:", customerError);
