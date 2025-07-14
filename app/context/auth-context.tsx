@@ -347,7 +347,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 // Load user claims when user signs in
                 try {
                     const idTokenResult = await user.getIdTokenResult();
-                    setUserRole(idTokenResult.claims.role as "admin" | "worker" | "client" || null);
+                    let role = idTokenResult.claims.role as "admin" | "worker" | "client" || null;
+                    
+                    // If user has no role (new user), automatically assign "client" role
+                    if (!role && user.email) {
+                        console.log('New user detected, assigning client role:', user.email);
+                        
+                        try {
+                            // Set role to "client" for new users
+                            await createClientRole(
+                                user.uid, 
+                                user.email, 
+                                user.displayName || user.email.split('@')[0]
+                            );
+                            
+                            // Force refresh token to get updated claims
+                            await user.getIdToken(true);
+                            const updatedTokenResult = await user.getIdTokenResult();
+                            role = updatedTokenResult.claims.role as "admin" | "worker" | "client" || null;
+                            
+                            console.log('Client role assigned successfully to:', user.email);
+                        } catch (error) {
+                            console.error('Error assigning client role to new user:', error);
+                            // Continue with null role to prevent blocking
+                        }
+                    }
+                    
+                    setUserRole(role);
                     setUserClaims(idTokenResult.claims);
 
                     // Load user profile

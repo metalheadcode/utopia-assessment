@@ -28,6 +28,22 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { generateOrderId } from "@/lib/orderId";
 import { UserService } from "@/lib/user-service";
+import Link from "next/link";
+
+// Customer interface
+interface Customer {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    uid?: string;
+    lastOrderDate?: Date | null;
+    totalOrders?: number;
+    isActive?: boolean;
+    createdAt: Date | null;
+    updatedAt: Date | null;
+}
 
 // Enhanced validation schema
 const formSchema = z.object({
@@ -60,6 +76,13 @@ export default function SubmitOrderPage() {
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [workers, setWorkers] = useState<UserProfile[]>([]);
     const [loadingWorkers, setLoadingWorkers] = useState(true);
+    
+    // Customer state management
+    const [customers, setCustomers] = useState<Customer[]>([]);
+    const [loadingCustomers, setLoadingCustomers] = useState(true);
+    const [selectedCustomer, setSelectedCustomer] = useState<string>("new");
+    const [searchTerm, setSearchTerm] = useState("");
+    
     const { user } = useAuth();
     const router = useRouter();
 
@@ -79,9 +102,10 @@ export default function SubmitOrderPage() {
 
     const { control, handleSubmit, reset, watch, formState: { errors } } = form;
 
-    // Load workers on component mount
+    // Load workers and customers on component mount
     useEffect(() => {
         loadWorkers();
+        loadCustomers();
     }, []);
 
     const loadWorkers = async () => {
@@ -97,6 +121,64 @@ export default function SubmitOrderPage() {
         }
     };
 
+    const loadCustomers = async () => {
+        try {
+            setLoadingCustomers(true);
+            const { getDocs, query, orderBy, limit } = await import('firebase/firestore');
+            
+            // Load recent customers first (last 50 for better performance)
+            const customersQuery = query(
+                collection(db, "customers"),
+                orderBy("updatedAt", "desc"),
+                limit(50)
+            );
+            
+            const querySnapshot = await getDocs(customersQuery);
+            const customerData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as Customer[];
+            
+            setCustomers(customerData);
+        } catch (error) {
+            console.error("Error loading customers:", error);
+            toast.error("Failed to load customers. Please refresh the page.");
+        } finally {
+            setLoadingCustomers(false);
+        }
+    };
+
+    // Handle customer selection and auto-fill
+    const handleCustomerSelection = (customerId: string) => {
+        setSelectedCustomer(customerId);
+        
+        if (customerId === "new") {
+            // Clear form for new customer
+            form.setValue("customerName", "");
+            form.setValue("customerEmail", "");
+            form.setValue("phone", "+6");
+            form.setValue("address", "");
+        } else {
+            // Find selected customer and auto-fill form
+            const customer = customers.find(c => c.id === customerId);
+            if (customer) {
+                form.setValue("customerName", customer.name);
+                form.setValue("customerEmail", customer.email);
+                form.setValue("phone", customer.phone || "+6");
+                form.setValue("address", customer.address || "");
+                
+                toast.success(`Customer ${customer.name} selected and form auto-filled!`);
+            }
+        }
+    };
+
+    // Filter customers based on search term
+    const filteredCustomers = customers.filter(customer =>
+        customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.phone.includes(searchTerm)
+    );
+
     const onSubmit = async (data: FormData) => {
         setIsSubmitting(true);
         setSubmitError(null);
@@ -106,11 +188,106 @@ export default function SubmitOrderPage() {
                 throw new Error("You must be logged in to submit an order");
             }
 
-            // Prepare order data for Firestore
+            // Step 1: Check if customer already exists
+            let customerId = null;
+            let customerUid = null;
+
+            // Check if customer already exists in customers collection
+            const customersCollection = collection(db, "customers");
+            const { getDocs, query, where } = await import('firebase/firestore');
+            const existingCustomerQuery = query(customersCollection, where("email", "==", data.customerEmail));
+            const existingCustomerSnapshot = await getDocs(existingCustomerQuery);
+
+            if (!existingCustomerSnapshot.empty) {
+                // Customer already exists, use existing record
+                const existingCustomerDoc = existingCustomerSnapshot.docs[0];
+                customerId = existingCustomerDoc.id;
+                customerUid = existingCustomerDoc.data().uid;
+                
+                // Update customer data if needed
+                const { updateDoc, doc } = await import('firebase/firestore');
+                await updateDoc(doc(db, "customers", customerId), {
+                    name: data.customerName,
+                    phone: data.phone,
+                    address: data.address,
+                    updatedAt: serverTimestamp(),
+                });
+                
+                toast.info("Existing customer updated with new information");
+            } else {
+                // Step 2: Create new customer user account with "client" role
+                try {
+                    const response = await fetch('/api/create-customer-user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: data.customerEmail,
+                            displayName: data.customerName,
+                            phone: data.phone,
+                            address: data.address
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Failed to create customer user');
+                    }
+
+                    customerUid = result.uid;
+                    customerId = result.customerId;
+                    
+                    // Send login link to customer
+                    const emailResponse = await fetch('/api/send-customer-login-link', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: data.customerEmail,
+                            customerName: data.customerName
+                        })
+                    });
+
+                    const emailResult = await emailResponse.json();
+                    
+                    if (!emailResponse.ok) {
+                        console.error("Failed to send login link:", emailResult);
+                        toast.warning(`Customer account created, but email sending failed: ${emailResult.error || 'Unknown error'}`);
+                    } else {
+                        toast.success("Customer account created and login link sent!");
+                    }
+                } catch (customerError) {
+                    // If customer user creation fails, create customer record without Firebase Auth
+                    console.warn("Customer user creation failed, creating customer record only:", customerError);
+                    
+                    const customerData = {
+                        name: data.customerName,
+                        email: data.customerEmail,
+                        phone: data.phone,
+                        address: data.address,
+                        uid: null, // No Firebase Auth user created
+                        createdAt: serverTimestamp(),
+                        updatedAt: serverTimestamp(),
+                    };
+                    
+                    const customerDocRef = await addDoc(customersCollection, customerData);
+                    customerId = customerDocRef.id;
+                    
+                    toast.warning("Customer record created (login capability will be added later)");
+                }
+            }
+
+            // Step 3: Create order with customer reference
             const orderData = {
-                ...data,
-                orderID: generateOrderId(),
+                customerName: data.customerName,
+                customerEmail: data.customerEmail,
+                phone: data.phone,
+                address: data.address,
+                service: data.service,
                 quotedPrice: parseFloat(data.quotedPrice),
+                assignedTechnician: data.assignedTechnician,
+                adminNotes: data.adminNotes,
+                customerId: customerId,
+                customerUid: customerUid, // Can be null if customer user creation failed
+                orderID: generateOrderId(),
                 submittedBy: user.uid,
                 submittedByEmail: user.email,
                 status: "PENDING",
@@ -118,12 +295,14 @@ export default function SubmitOrderPage() {
                 updatedAt: serverTimestamp(),
             };
 
-            // Add document to Firestore
+            // Add order document to Firestore
             const ordersCollection = collection(db, "orders");
             const docRef = await addDoc(ordersCollection, orderData);
 
             // Reset form on success
             reset();
+            setSelectedCustomer("new");
+            setSearchTerm("");
 
             // Show success message
             toast.success(`Order ${docRef.id} submitted successfully!`);
@@ -189,6 +368,58 @@ export default function SubmitOrderPage() {
                                 {/* Customer Information */}
                                 <div className="space-y-4">
                                     <h3 className="text-lg font-medium">Customer Information</h3>
+
+                                    <Select
+                                        value={selectedCustomer}
+                                        onValueChange={handleCustomerSelection}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a customer" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="new">✨ New Customer</SelectItem>
+                                            {loadingCustomers ? (
+                                                <SelectItem value="loading" disabled>
+                                                    Loading customers...
+                                                </SelectItem>
+                                            ) : customers.length === 0 ? (
+                                                <SelectItem value="no-customers" disabled>
+                                                    No customers found
+                                                </SelectItem>
+                                            ) : (
+                                                <>
+                                                    {/* Search input */}
+                                                    <div className="px-2 py-1 sticky top-0 bg-white border-b">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Search customers..."
+                                                            value={searchTerm}
+                                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                                            className="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                        />
+                                                    </div>
+                                                    
+                                                    {/* Customer list */}
+                                                    {filteredCustomers.length === 0 ? (
+                                                        <SelectItem value="no-match" disabled>
+                                                            No customers match your search
+                                                        </SelectItem>
+                                                    ) : (
+                                                        filteredCustomers.map((customer) => (
+                                                            <SelectItem key={customer.id} value={customer.id}>
+                                                                <div className="flex flex-col">
+                                                                    <span className="font-medium">{customer.name}</span>
+                                                                    <span className="text-xs text-gray-500">
+                                                                        {customer.email} • {customer.phone}
+                                                                    </span>
+                                                                </div>
+                                                            </SelectItem>
+                                                        ))
+                                                    )}
+                                                </>
+                                            )}
+                                        </SelectContent>
+                                    </Select>
 
                                     <FormField
                                         control={control}
@@ -308,26 +539,13 @@ export default function SubmitOrderPage() {
                                                     Service Type
                                                     <span className="text-red-500">*</span>
                                                 </FormLabel>
-                                                {/* <FormControl>
-                                                <select
-                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                                    {...field}
-                                                >
-                                                    <option value="">Select a service type</option>
-                                                    {serviceOptions.map((option) => (
-                                                        <option key={option} value={option}>
-                                                            {option}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </FormControl> */}
 
                                                 <FormControl>
                                                     <Select
                                                         value={field.value}
                                                         onValueChange={field.onChange}
                                                     >
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className="w-full">
                                                             <SelectValue placeholder="Select a service type" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -395,7 +613,7 @@ export default function SubmitOrderPage() {
                                                         onValueChange={field.onChange}
                                                         disabled={loadingWorkers}
                                                     >
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className="w-full">
                                                             <SelectValue placeholder="Select a technician" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -418,7 +636,7 @@ export default function SubmitOrderPage() {
                                                     </Select>
                                                 </FormControl>
                                                 <FormDescription>
-                                                    Technician assigned to this order
+                                                    If no technicians are available, please create a new technician <Link className="text-blue-500 underline" href="/dashboard/worker-list">here</Link>
                                                 </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
@@ -465,7 +683,11 @@ export default function SubmitOrderPage() {
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        onClick={() => reset()}
+                                        onClick={() => {
+                                            reset();
+                                            setSelectedCustomer("new");
+                                            setSearchTerm("");
+                                        }}
                                         disabled={isSubmitting}
                                     >
                                         Reset
@@ -517,7 +739,7 @@ export default function SubmitOrderPage() {
                                         <p className="font-medium">{quotedPrice}</p>
                                     </div>
                                     <div>
-                                        <Label className="text-xs text-muted-foreground">Assigned Technician</Label>
+                                        <Label className="text-xs text-muted-foreground" >Assigned Technician</Label>
                                         <p className="font-medium">{assignedTechnician}</p>
                                     </div>
                                     <div>

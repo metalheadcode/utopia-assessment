@@ -100,6 +100,26 @@ service cloud.firestore {
       allow update, delete: if false;
     }
     
+    // CUSTOMERS
+    match /customers/{customerId} {
+      // Read: 
+      // - Admins can read all customers
+      // - Clients can read their own customer record (if uid matches)
+      allow read: if isAuthenticated() && 
+                     (isAdmin() || 
+                      (isClient() && resource.data.uid == request.auth.uid));
+      
+      // Create: Admins can create customer records
+      // Note: API endpoints use Admin SDK which bypasses these rules
+      allow create: if isAdmin();
+      
+      // Update: Admins can update customer records
+      allow update: if isAdmin();
+      
+      // Delete: Only admins can delete customer records
+      allow delete: if isAdmin();
+    }
+    
     // ORDERS
     match /orders/{orderId} {
       // Read: 

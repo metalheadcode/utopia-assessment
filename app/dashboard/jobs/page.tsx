@@ -54,15 +54,6 @@ export default function JobsPage() {
         return technicianNames[uid] || uid.slice(-6); // Fallback to last 6 chars of UID
     };
 
-    // Function to get technician initials for avatar
-    // const getTechnicianInitials = (uid: string): string => {
-    //     const name = technicianNames[uid];
-    //     if (name) {
-    //         return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
-    //     }
-    //     return uid.slice(-2).toUpperCase();
-    // };
-
     const takeJobHandler = async (id: string) => {
         if (!user) return;
 
@@ -187,17 +178,20 @@ export default function JobsPage() {
         try {
             setLoading(true);
 
-            // If admin and impersonating, show jobs for that worker
-            // If worker or admin not impersonating, show own jobs
-            const targetUid = currentImpersonation ? currentImpersonation.workerUid : user.uid;
-
             const ordersCollection = collection(db, "orders");
+            let q;
 
-            // Workers should see jobs assigned to them, regardless of who created the order
-            const q = query(
-                ordersCollection,
-                where("assignedTechnician", "==", targetUid)
-            );
+            if (userRole === 'admin' && !currentImpersonation) {
+                // Admin not impersonating - show ALL jobs
+                q = query(ordersCollection);
+            } else {
+                // Worker OR admin impersonating - show jobs assigned to specific technician
+                const targetUid = currentImpersonation ? currentImpersonation.workerUid : user.uid;
+                q = query(
+                    ordersCollection,
+                    where("assignedTechnician", "==", targetUid)
+                );
+            }
 
             const querySnapshot = await getDocs(q);
             const ordersData = querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
@@ -228,7 +222,7 @@ export default function JobsPage() {
         } finally {
             setLoading(false);
         }
-    }, [user, currentImpersonation]);
+    }, [user, currentImpersonation, userRole]);
 
     useEffect(() => {
         loadOrders();
@@ -244,15 +238,15 @@ export default function JobsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Jobs</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Jobs</h1>
                     <p className="text-muted-foreground">
                         View and manage your assigned jobs
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
                     {userRole === 'admin' && <DelegationManagement />}
                     <div className="text-sm text-muted-foreground">
                         {orders.length} {orders.length === 1 ? 'job' : 'jobs'}
@@ -262,9 +256,9 @@ export default function JobsPage() {
 
             {/* CONTENT START HERE */}
             {userRole === 'admin' && (
-                <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">Act as worker:</span>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 bg-muted rounded-lg">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                        <span className="text-sm font-medium whitespace-nowrap">Act as worker:</span>
                         <Select
                             value={currentImpersonation?.id || "__none__"}
                             onValueChange={(value) => {
@@ -278,7 +272,7 @@ export default function JobsPage() {
                                 }
                             }}
                         >
-                            <SelectTrigger className="w-[200px]">
+                            <SelectTrigger className="w-full sm:w-[200px]">
                                 <SelectValue placeholder="Select worker" />
                             </SelectTrigger>
                             <SelectContent>
@@ -292,7 +286,7 @@ export default function JobsPage() {
                         </Select>
                     </div>
                     {currentImpersonation && (
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="w-full sm:w-auto text-center sm:text-left">
                             Permissions: {currentImpersonation.permissions.join(', ')}
                         </Badge>
                     )}
@@ -304,9 +298,9 @@ export default function JobsPage() {
                     <p className="text-muted-foreground">No jobs found. Ask admin or your supervisor to create a job for you.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {orders.map((order) => (
-                        <Card key={order.id} className="hover:shadow-lg transition-shadow duration-200 border-0 shadow-sm">
+                        <Card key={order.id} className="hover:shadow-lg transition-shadow duration-200 border-0 shadow-sm h-fit">
                             <CardHeader className="pb-3">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
