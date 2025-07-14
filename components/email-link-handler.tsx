@@ -17,13 +17,27 @@ export function EmailLinkHandler() {
                 setIsProcessing(true);
 
                 try {
-                    // Get the email from localStorage
-                    const email = window.localStorage.getItem('emailForSignIn');
+                    // Try to get the email from localStorage first
+                    let email = window.localStorage.getItem('emailForSignIn');
 
+                    // If no email in localStorage, prompt the user for their email
+                    // This handles customer invitation emails where they didn't use the login form
                     if (!email) {
-                        toast.error("Email not found. Please try logging in again.");
-                        router.push('/login');
-                        return;
+                        email = prompt("Please enter your email address to complete the sign-in:");
+                        
+                        if (!email) {
+                            toast.error("Email is required to complete sign-in.");
+                            router.push('/login');
+                            return;
+                        }
+
+                        // Validate email format
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(email)) {
+                            toast.error("Please enter a valid email address.");
+                            router.push('/login');
+                            return;
+                        }
                     }
 
                     // Sign in with the email link
