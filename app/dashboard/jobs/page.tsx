@@ -238,15 +238,15 @@ export default function JobsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Jobs</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Jobs</h1>
                     <p className="text-muted-foreground">
                         View and manage your assigned jobs
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
                     {userRole === 'admin' && <DelegationManagement />}
                     <div className="text-sm text-muted-foreground">
                         {orders.length} {orders.length === 1 ? 'job' : 'jobs'}
@@ -256,9 +256,9 @@ export default function JobsPage() {
 
             {/* CONTENT START HERE */}
             {userRole === 'admin' && (
-                <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">Act as worker:</span>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 bg-muted rounded-lg">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                        <span className="text-sm font-medium whitespace-nowrap">Act as worker:</span>
                         <Select
                             value={currentImpersonation?.id || "__none__"}
                             onValueChange={(value) => {
@@ -272,7 +272,7 @@ export default function JobsPage() {
                                 }
                             }}
                         >
-                            <SelectTrigger className="w-[200px]">
+                            <SelectTrigger className="w-full sm:w-[200px]">
                                 <SelectValue placeholder="Select worker" />
                             </SelectTrigger>
                             <SelectContent>
@@ -286,7 +286,7 @@ export default function JobsPage() {
                         </Select>
                     </div>
                     {currentImpersonation && (
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="w-full sm:w-auto text-center sm:text-left">
                             Permissions: {currentImpersonation.permissions.join(', ')}
                         </Badge>
                     )}

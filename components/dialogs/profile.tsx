@@ -16,12 +16,11 @@ import { useAuth } from "@/app/context/auth-context"
 import { Form, FormMessage, FormItem, FormDescription, FormControl, FormLabel, FormField } from "@/components/ui/form"
 import { useState } from "react"
 import { toast } from "sonner"
-import { Separator } from "@/components/ui/separator"
+import { UserService } from "@/lib/user-service"
 
 // Enhanced validation schema
 const profileSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
-    photoURL: z.string().url().optional().or(z.literal("")),
     phoneNumber: z.string()
         .min(10, "Phone number must be at least 10 digits")
         .regex(/^[\+]?[1-9][\d]{0,15}$/, "Please enter a valid phone number")
@@ -33,7 +32,7 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>
 
 export function ProfileDialog({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (open: boolean) => void }) {
-    const { user } = useAuth()
+    const { user, refreshUserProfile } = useAuth()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -41,7 +40,6 @@ export function ProfileDialog({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpe
         resolver: zodResolver(profileSchema),
         defaultValues: {
             name: user?.displayName || "",
-            photoURL: user?.photoURL || "",
             phoneNumber: user?.phoneNumber || "",
             email: user?.email || "",
         }
@@ -54,29 +52,34 @@ export function ProfileDialog({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpe
         setSubmitError(null)
 
         try {
-
             if (!user) {
                 throw new Error("You must be logged in to update your profile")
             }
 
-            // Here you would typically update the user profile in Firebase
-            // For now, we'll just log the data and show a success message
-            console.log("Profile update data:", data)
+            // Update Firebase Auth profile
+            const { updateProfile } = await import('firebase/auth')
+            await updateProfile(user, {
+                displayName: data.name
+            })
 
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            // Update Firestore user profile
+            await UserService.updateUserProfile(user.uid, {
+                displayName: data.name,
+                email: data.email,
+                phoneNumber: data.phoneNumber || ""
+            })
 
-            // Show success message
+            // Refresh user profile in context
+            await refreshUserProfile()
+
             toast.success("Profile updated successfully!")
-
-            // Reset form with new values
             reset(data)
             setIsOpen(false)
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : "Failed to update profile. Please try again."
+            const errorMessage = error instanceof Error ?
+                error.message : "Failed to update profile"
             setSubmitError(errorMessage)
             toast.error(errorMessage)
-            console.error("Profile update error:", error)
         } finally {
             setIsSubmitting(false)
         }
@@ -192,36 +195,6 @@ export function ProfileDialog({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpe
                                         </FormItem>
                                     )}
                                 />
-                            </div>
-
-                            <Separator />
-
-                            {/* Profile Settings */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-medium">Profile Settings</h3>
-
-                                <FormField
-                                    control={control}
-                                    name="photoURL"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Profile Photo URL</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="https://example.com/photo.jpg"
-                                                    type="url"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                URL to your profile photo
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-
                             </div>
 
                             {/* Error Display */}
