@@ -1,11 +1,12 @@
 import * as React from "react"
 import {
-  Bot,
   AirVent,
   LifeBuoy,
   Send,
-  SquareTerminal,
   LucideIcon,
+  Users,
+  ToolCase,
+  ShieldUser,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -56,7 +57,7 @@ const data: SidebarData = {
     {
       title: "Admin",
       url: "#",
-      icon: SquareTerminal,
+      icon: ShieldUser,
       isActive: true,
       items: [
         {
@@ -72,7 +73,7 @@ const data: SidebarData = {
     {
       title: "Workers",
       url: "#",
-      icon: Bot,
+      icon: ToolCase,
       isActive: true,
       items: [
         {
@@ -81,54 +82,18 @@ const data: SidebarData = {
         }
       ],
     },
-    // {
-    //   title: "Documentation",
-    //   url: "#",
-    //   icon: BookOpen,
-    //   isActive: false,
-    //   items: [
-    //     {
-    //       title: "Introduction",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Get Started",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Tutorials",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Changelog",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
-    // {
-    //   title: "Settings",
-    //   url: "#",
-    //   icon: Settings2,
-    //   isActive: false,
-    //   items: [
-    //     {
-    //       title: "General",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Team",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Billing",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Limits",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
+    {
+      title: "Customers",
+      url: "#",
+      icon: Users,
+      isActive: true,
+      items: [
+        {
+          title: "Orders",
+          url: "/dashboard/orders",
+        }
+      ],
+    }
   ],
   navSecondary: [
     {
@@ -141,24 +106,7 @@ const data: SidebarData = {
       url: "#",
       icon: Send,
     },
-  ],
-  // projects: [
-  //   {
-  //     name: "Design Engineering",
-  //     url: "#",
-  //     icon: Frame,
-  //   },
-  //   {
-  //     name: "Sales & Marketing",
-  //     url: "#",
-  //     icon: PieChart,
-  //   },
-  //   {
-  //     name: "Travel",
-  //     url: "#",
-  //     icon: Map,
-  //   },
-
+  ]
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -173,6 +121,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
     if (userRole === "worker") {
       return data.navMain.filter(item => item.title === "Workers")
+    }
+    if (userRole === "client") {
+      return data.navMain.filter(item => item.title === "Customers")
     }
   }, [userRole])
 
@@ -197,7 +148,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={roleLabel || []} />
-        {/* <NavSecondary items={data.navSecondary} /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
