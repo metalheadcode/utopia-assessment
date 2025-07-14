@@ -1,5 +1,5 @@
 "use client";
-import { Settings } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { useState } from "react";
@@ -113,7 +113,7 @@ export function CreateWorkerDialog() {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline">
-                    <Settings className="w-4 h-4 mr-2" />
+                    <UserPlus className="w-4 h-4 mr-2" />
                     Create Worker
                 </Button>
             </DialogTrigger>
@@ -183,6 +183,7 @@ export function CreateWorkerDialog() {
                             <li>• You automatically become their supervisor</li>
                             <li>• They appear in your &quot;Manage Delegations&quot; list</li>
                             <li>• Auto-generated Technician ID assigned</li>
+                            <li>• Worker will receive a secure login link via email (Note: Please check spam folder if not received)</li>
                         </ul>
                     </div>
 

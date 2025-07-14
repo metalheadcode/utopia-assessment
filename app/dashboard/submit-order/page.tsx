@@ -28,6 +28,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { generateOrderId } from "@/lib/orderId";
 import { UserService } from "@/lib/user-service";
+import Link from "next/link";
 
 // Enhanced validation schema
 const formSchema = z.object({
@@ -308,26 +309,13 @@ export default function SubmitOrderPage() {
                                                     Service Type
                                                     <span className="text-red-500">*</span>
                                                 </FormLabel>
-                                                {/* <FormControl>
-                                                <select
-                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                                    {...field}
-                                                >
-                                                    <option value="">Select a service type</option>
-                                                    {serviceOptions.map((option) => (
-                                                        <option key={option} value={option}>
-                                                            {option}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </FormControl> */}
 
                                                 <FormControl>
                                                     <Select
                                                         value={field.value}
                                                         onValueChange={field.onChange}
                                                     >
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className="w-full">
                                                             <SelectValue placeholder="Select a service type" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -395,7 +383,7 @@ export default function SubmitOrderPage() {
                                                         onValueChange={field.onChange}
                                                         disabled={loadingWorkers}
                                                     >
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className="w-full">
                                                             <SelectValue placeholder="Select a technician" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -418,7 +406,7 @@ export default function SubmitOrderPage() {
                                                     </Select>
                                                 </FormControl>
                                                 <FormDescription>
-                                                    Technician assigned to this order
+                                                    If no technicians are available, please create a new technician <Link className="text-blue-500 underline" href="/dashboard/worker-list">here</Link>
                                                 </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
@@ -517,7 +505,7 @@ export default function SubmitOrderPage() {
                                         <p className="font-medium">{quotedPrice}</p>
                                     </div>
                                     <div>
-                                        <Label className="text-xs text-muted-foreground">Assigned Technician</Label>
+                                        <Label className="text-xs text-muted-foreground" >Assigned Technician</Label>
                                         <p className="font-medium">{assignedTechnician}</p>
                                     </div>
                                     <div>
