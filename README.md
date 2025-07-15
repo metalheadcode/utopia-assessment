@@ -148,7 +148,68 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## 📱 Screenshots
 
-*Coming soon...* 📸
+#### *Admin Invitation* 👑
+Admin invitation allows administrators to send secure login links to new users. The system ensures that only authorized administrators can create new accounts, maintaining security and access control. Features include:
+
+- 📧 Email-based authentication
+- 🔒 Secure one-time login links
+- ⚡ Quick account setup process
+- 🛡️ Role-based access control
+- 📱 Responsive design for all devices
+
+![Admin invitation screenshot](public/screenshots/admin-invitation.webp)
+
+#### *Dashboard* 🖥️
+The dashboard provides a comprehensive overview of service operations, displaying key statistics, recent activities, and quick access to essential management features. It empowers admins and managers to monitor business performance, track orders, and make informed decisions at a glance.
+
+- 📊 Real-time statistics and analytics
+- 🗂️ Quick access to orders, workers, and customers
+- 🖥️ Centralized management interface
+- 📱 Fully responsive for desktop and mobile
+
+![Dashboard Overview with Statistics](public/screenshots/dashboard-two.webp)
+![Main Dashboard Interface](public/screenshots/dashboard.webp)
+
+#### *Role Management* 
+Role management allows administrators to assign, update, and review user roles and permissions within the system. This ensures that each team member has the appropriate level of access, supporting secure and efficient operations.
+
+- 🛡️ Fine-grained access control
+- 👥 Assign roles to users (admin, worker, customer, etc.)
+- 🔄 Update permissions as business needs evolve
+- 📱 Responsive and easy to use
+
+![Role Management and Permissions](public/screenshots/role-management.webp)
+
+#### *Create New Order For Worker*
+The order creation form streamlines the process of assigning new jobs to workers. Admins can quickly input order details, select workers, and set schedules, ensuring efficient job allocation and clear communication.
+
+- 📝 Simple, guided order submission
+- 👷 Assign jobs to available workers
+- 📅 Schedule service dates and times
+- ✅ Form validation for data accuracy
+
+![New Order Submission Form](public/screenshots/submit-new-order.webp)
+
+#### *Worker Management*
+Worker management provides tools for admins to view, add, and update worker profiles. It helps keep track of technician availability, skills, and assignments, supporting optimal resource allocation and team organization.
+
+- 👷 View and manage worker profiles
+- 🗓️ Track assignments and availability
+- ✏️ Edit worker details as needed
+- 📱 Mobile-friendly interface
+
+![Worker Management Interface](public/screenshots/worker-management.webp)
+
+#### *Job List For Worker*
+The job list displays all assigned jobs for each worker, including job details, status, and delegation options. Workers can easily see their tasks, mark jobs as complete, and handle delegated responsibilities, improving workflow and accountability.
+
+- 📋 List of assigned jobs with status
+- 🔄 Delegation management for flexible teamwork
+- ✅ Mark jobs as complete
+- 📱 Optimized for use on mobile devices
+
+![Jobs Page](public/screenshots/jobs-page.webp)
+![Jobs Page With Delegation On](public/screenshots/jobs-page-with-delegation.webp)
 
 ---
 

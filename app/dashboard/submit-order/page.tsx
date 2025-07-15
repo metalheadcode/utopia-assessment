@@ -76,13 +76,13 @@ export default function SubmitOrderPage() {
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [workers, setWorkers] = useState<UserProfile[]>([]);
     const [loadingWorkers, setLoadingWorkers] = useState(true);
-    
+
     // Customer state management
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [loadingCustomers, setLoadingCustomers] = useState(true);
     const [selectedCustomer, setSelectedCustomer] = useState<string>("new");
     const [searchTerm, setSearchTerm] = useState("");
-    
+
     const { user } = useAuth();
     const router = useRouter();
 
@@ -125,20 +125,20 @@ export default function SubmitOrderPage() {
         try {
             setLoadingCustomers(true);
             const { getDocs, query, orderBy, limit } = await import('firebase/firestore');
-            
+
             // Load recent customers first (last 50 for better performance)
             const customersQuery = query(
                 collection(db, "customers"),
                 orderBy("updatedAt", "desc"),
                 limit(50)
             );
-            
+
             const querySnapshot = await getDocs(customersQuery);
             const customerData = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             })) as Customer[];
-            
+
             setCustomers(customerData);
         } catch (error) {
             console.error("Error loading customers:", error);
@@ -151,7 +151,7 @@ export default function SubmitOrderPage() {
     // Handle customer selection and auto-fill
     const handleCustomerSelection = (customerId: string) => {
         setSelectedCustomer(customerId);
-        
+
         if (customerId === "new") {
             // Clear form for new customer
             form.setValue("customerName", "");
@@ -166,7 +166,7 @@ export default function SubmitOrderPage() {
                 form.setValue("customerEmail", customer.email);
                 form.setValue("phone", customer.phone || "+6");
                 form.setValue("address", customer.address || "");
-                
+
                 toast.success(`Customer ${customer.name} selected and form auto-filled!`);
             }
         }
@@ -180,12 +180,23 @@ export default function SubmitOrderPage() {
     );
 
     const onSubmit = async (data: FormData) => {
+        console.log(data, data.customerEmail);
         setIsSubmitting(true);
         setSubmitError(null);
 
         try {
             if (!user) {
                 throw new Error("You must be logged in to submit an order");
+            }
+
+            // Ensure we have all customer data (handle disabled field case)
+            const customerEmail = data.customerEmail || form.getValues('customerEmail');
+            const customerName = data.customerName || form.getValues('customerName');
+            const customerPhone = data.phone || form.getValues('phone');
+            const customerAddress = data.address || form.getValues('address');
+            
+            if (!customerEmail) {
+                throw new Error("Customer email is required");
             }
 
             // Step 1: Check if customer already exists
@@ -195,7 +206,7 @@ export default function SubmitOrderPage() {
             // Check if customer already exists in customers collection
             const customersCollection = collection(db, "customers");
             const { getDocs, query, where } = await import('firebase/firestore');
-            const existingCustomerQuery = query(customersCollection, where("email", "==", data.customerEmail));
+            const existingCustomerQuery = query(customersCollection, where("email", "==", customerEmail));
             const existingCustomerSnapshot = await getDocs(existingCustomerQuery);
 
             if (!existingCustomerSnapshot.empty) {
@@ -203,16 +214,17 @@ export default function SubmitOrderPage() {
                 const existingCustomerDoc = existingCustomerSnapshot.docs[0];
                 customerId = existingCustomerDoc.id;
                 customerUid = existingCustomerDoc.data().uid;
-                
+
                 // Update customer data if needed
                 const { updateDoc, doc } = await import('firebase/firestore');
+                
                 await updateDoc(doc(db, "customers", customerId), {
-                    name: data.customerName,
-                    phone: data.phone,
-                    address: data.address,
+                    name: customerName,
+                    phone: customerPhone,
+                    address: customerAddress,
                     updatedAt: serverTimestamp(),
                 });
-                
+
                 toast.info("Existing customer updated with new information");
             } else {
                 // Step 2: Create new customer user account with "client" role
@@ -221,10 +233,10 @@ export default function SubmitOrderPage() {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            email: data.customerEmail,
-                            displayName: data.customerName,
-                            phone: data.phone,
-                            address: data.address
+                            email: customerEmail,
+                            displayName: customerName,
+                            phone: customerPhone,
+                            address: customerAddress
                         })
                     });
 
@@ -235,19 +247,19 @@ export default function SubmitOrderPage() {
 
                     customerUid = result.uid;
                     customerId = result.customerId;
-                    
+
                     // Send login link to customer
                     const emailResponse = await fetch('/api/send-customer-login-link', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            email: data.customerEmail,
-                            customerName: data.customerName
+                            email: customerEmail,
+                            customerName: customerName
                         })
                     });
 
                     const emailResult = await emailResponse.json();
-                    
+
                     if (!emailResponse.ok) {
                         console.error("Failed to send login link:", emailResult);
                         toast.warning(`Customer account created, but email sending failed: ${emailResult.error || 'Unknown error'}`);
@@ -257,30 +269,30 @@ export default function SubmitOrderPage() {
                 } catch (customerError) {
                     // If customer user creation fails, create customer record without Firebase Auth
                     console.warn("Customer user creation failed, creating customer record only:", customerError);
-                    
+
                     const customerData = {
-                        name: data.customerName,
-                        email: data.customerEmail,
-                        phone: data.phone,
-                        address: data.address,
+                        name: customerName,
+                        email: customerEmail,
+                        phone: customerPhone,
+                        address: customerAddress,
                         uid: null, // No Firebase Auth user created
                         createdAt: serverTimestamp(),
                         updatedAt: serverTimestamp(),
                     };
-                    
+
                     const customerDocRef = await addDoc(customersCollection, customerData);
                     customerId = customerDocRef.id;
-                    
+
                     toast.warning("Customer record created (login capability will be added later)");
                 }
             }
 
             // Step 3: Create order with customer reference
             const orderData = {
-                customerName: data.customerName,
-                customerEmail: data.customerEmail,
-                phone: data.phone,
-                address: data.address,
+                customerName: customerName,
+                customerEmail: customerEmail,
+                phone: customerPhone,
+                address: customerAddress,
                 service: data.service,
                 quotedPrice: parseFloat(data.quotedPrice),
                 assignedTechnician: data.assignedTechnician,
@@ -307,7 +319,7 @@ export default function SubmitOrderPage() {
             // Show success message
             toast.success(`Order ${docRef.id} submitted successfully!`);
 
-            router.push(`/dashboard/orders`);
+            router.push(`/dashboard/jobs`);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Failed to submit order. Please try again.";
             setSubmitError(errorMessage);
@@ -337,18 +349,6 @@ export default function SubmitOrderPage() {
                     <p className="text-muted-foreground">
                         Create a new service order for air conditioning services
                     </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    {/* <CreateWorkerDialog />
-                    <Button
-                        onClick={handleRefresh}
-                        disabled={refreshing}
-                        variant="outline"
-                    >
-                        <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                        Refresh
-                    </Button> */}
                 </div>
             </div>
 
@@ -398,7 +398,7 @@ export default function SubmitOrderPage() {
                                                             className="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                                                         />
                                                     </div>
-                                                    
+
                                                     {/* Customer list */}
                                                     {filteredCustomers.length === 0 ? (
                                                         <SelectItem value="no-match" disabled>
@@ -422,6 +422,7 @@ export default function SubmitOrderPage() {
                                     </Select>
 
                                     <FormField
+                                        disabled={selectedCustomer !== "new"}
                                         control={control}
                                         name="customerName"
                                         render={({ field }) => (
@@ -445,6 +446,7 @@ export default function SubmitOrderPage() {
                                     />
 
                                     <FormField
+                                        disabled={selectedCustomer !== "new"}
                                         control={control}
                                         name="customerEmail"
                                         render={({ field }) => (
@@ -469,6 +471,7 @@ export default function SubmitOrderPage() {
                                     />
 
                                     <FormField
+                                        disabled={selectedCustomer !== "new"}
                                         control={control}
                                         name="phone"
                                         render={({ field }) => (
@@ -518,10 +521,10 @@ export default function SubmitOrderPage() {
                                         )}
                                     />
 
-                                    <MalaysiaAddress
+                                    {selectedCustomer === "new" && <MalaysiaAddress
                                         control={control}
                                         name="address"
-                                    />
+                                    />}
                                 </div>
 
                                 <Separator />

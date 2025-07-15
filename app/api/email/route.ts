@@ -8,9 +8,12 @@ interface EmailRequest {
     technicianName?: string;
     orderId?: string;
     time?: string;
-    type: "customer" | "technician" | "customer_login_link";
+    type: "customer" | "technician" | "customer_login_link" | "admin_invitation";
     service?: string; // Additional field for better context
     signInLink?: string; // For customer login links
+    invitationId?: string; // For admin invitations
+    inviterName?: string; // For admin invitations
+    loginUrl?: string; // For admin invitations
 }
 
 export async function POST(request: Request) {
@@ -27,7 +30,7 @@ export async function POST(request: Request) {
         const resend = new Resend(process.env.RESEND_API_KEY);
         const body: EmailRequest = await request.json();
 
-        const { to, subject, clientName, technicianName, orderId, time, type, service, signInLink } = body;
+        const { to, subject, clientName, technicianName, orderId, time, type, service, signInLink, invitationId, inviterName, loginUrl } = body;
 
         // Validate required fields - different requirements for different types
         if (!to || !subject || !clientName || !type) {
@@ -41,6 +44,13 @@ export async function POST(request: Request) {
         if (type === "customer_login_link" && !signInLink) {
             return NextResponse.json(
                 { error: "signInLink is required for customer_login_link type" },
+                { status: 400 }
+            );
+        }
+
+        if (type === "admin_invitation" && (!invitationId || !loginUrl)) {
+            return NextResponse.json(
+                { error: "invitationId and loginUrl are required for admin_invitation type" },
                 { status: 400 }
             );
         }
@@ -62,9 +72,9 @@ export async function POST(request: Request) {
         }
 
         // Validate type
-        if (!["customer", "technician", "customer_login_link"].includes(type)) {
+        if (!["customer", "technician", "customer_login_link", "admin_invitation"].includes(type)) {
             return NextResponse.json(
-                { error: "Type must be either 'customer', 'technician', or 'customer_login_link'" },
+                { error: "Type must be either 'customer', 'technician', 'customer_login_link', or 'admin_invitation'" },
                 { status: 400 }
             );
         }
@@ -216,6 +226,71 @@ export async function POST(request: Request) {
                         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
                             <p style="color: #718096; font-size: 14px; margin: 0;">
                                 Need help? Reply to this email or contact our support team.
+                            </p>
+                        </div>
+                    </div>
+                </body>
+            </html>`;
+        }
+
+        if (type === "admin_invitation") {
+            html = `
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Admin Invitation - Sejook Namatey Dashboard</title>
+                </head>
+                <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+                    <div style="background-color: #ffffff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h1 style="color: #1a202c; margin: 0; font-size: 28px;">👑 Admin Invitation</h1>
+                        </div>
+                        
+                        <p style="color: #4a5568; margin-bottom: 16px; font-size: 16px;">Hello ${clientName},</p>
+                        
+                        <p style="color: #4a5568; margin-bottom: 20px; font-size: 16px;">
+                            You've been invited by <strong>${inviterName}</strong> to join the SejookNamatey dashboard as an administrator.
+                        </p>
+                        
+                        <div style="background-color: #fff8e1; border-left: 4px solid #ffc107; padding: 20px; margin: 25px 0; border-radius: 6px;">
+                            <h3 style="color: #2d3748; margin-top: 0; margin-bottom: 15px;">🔑 Admin Privileges Include:</h3>
+                            <ul style="color: #4a5568; margin: 0; padding-left: 20px;">
+                                <li>Manage service orders and job assignments</li>
+                                <li>Oversee worker performance and delegations</li>
+                                <li>Access comprehensive dashboard analytics</li>
+                                <li>Manage user roles and permissions</li>
+                                <li>View complete system audit logs</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="${loginUrl}" style="background-color: #ffc107; color: #1a202c; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+                                👑 Accept Admin Invitation
+                            </a>
+                        </div>
+                        
+                        <div style="background-color: #fff5f5; border-left: 4px solid #f56565; padding: 20px; margin: 25px 0; border-radius: 6px;">
+                            <h3 style="color: #2d3748; margin-top: 0; margin-bottom: 15px;">⚠️ Important Notes</h3>
+                            <ul style="color: #4a5568; margin: 0; padding-left: 20px;">
+                                <li>This invitation expires in 7 days</li>
+                                <li>Click the link to accept and receive your login credentials</li>
+                                <li>You'll be automatically granted admin privileges upon first login</li>
+                                <li>Keep your admin credentials secure and confidential</li>
+                            </ul>
+                        </div>
+                        
+                        <p style="color: #4a5568; margin-top: 30px; font-size: 16px;">
+                            If you have any questions about this invitation or need assistance, please contact <strong>${inviterName}</strong> who sent this invitation.
+                        </p>
+                        
+                        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                            <p style="color: #718096; font-size: 14px; margin: 0;">
+                                SejookNamatey - Air Conditioning Services Management
+                            </p>
+                            <p style="color: #718096; font-size: 12px; margin: 5px 0 0 0;">
+                                Invitation ID: ${invitationId}
                             </p>
                         </div>
                     </div>

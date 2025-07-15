@@ -4,7 +4,6 @@ import {
   LifeBuoy,
   Send,
   LucideIcon,
-  Users,
   ToolCase,
   ShieldUser,
 } from "lucide-react"
@@ -68,6 +67,10 @@ const data: SidebarData = {
           title: "Worker List",
           url: "/dashboard/worker-list",
         },
+        {
+          title: "Role Management",
+          url: "/dashboard/role-management",
+        },
       ],
     },
     {
@@ -82,18 +85,6 @@ const data: SidebarData = {
         }
       ],
     },
-    {
-      title: "Customers",
-      url: "#",
-      icon: Users,
-      isActive: true,
-      items: [
-        {
-          title: "Orders",
-          url: "/dashboard/orders",
-        }
-      ],
-    }
   ],
   navSecondary: [
     {
@@ -121,9 +112,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
     if (userRole === "worker") {
       return data.navMain.filter(item => item.title === "Workers")
-    }
-    if (userRole === "client") {
-      return data.navMain.filter(item => item.title === "Customers")
     }
   }, [userRole])
 
