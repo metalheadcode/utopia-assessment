@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
             },
             body: JSON.stringify({
                 to: email,
-                subject: 'Access Your Service Order Status - SejookNamatey',
+                subject: 'Access Your Service Order Status - SejookNamastey',
                 clientName: customerName,
                 type: 'customer_login_link',
                 signInLink: signInLink
