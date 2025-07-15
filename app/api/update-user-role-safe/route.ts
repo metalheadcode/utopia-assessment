@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
         const token = authHeader.replace('Bearer ', '');
         const decodedToken = await admin.auth().verifyIdToken(token);
-        
+
         if (decodedToken.role !== 'admin') {
             return NextResponse.json(
                 { error: "Admin privileges required" },
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         }
 
         const db = admin.firestore();
-        
+
         // Get current user profile
         const userProfile = await db.collection('userProfiles').doc(uid).get();
         if (!userProfile.exists) {
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Perform safety checks
-        let safetyChecks = { passed: true, errors: [] as string[] };
+        const safetyChecks = { passed: true, errors: [] as string[] };
 
         // Check for active jobs if changing from worker
         if (currentRole === 'worker' && newRole !== 'worker') {
@@ -122,13 +122,24 @@ export async function POST(request: NextRequest) {
         });
 
         // Update user profile
-        const profileUpdateData: any = {
+        const profileUpdateData: {
+            role: string;
+            updatedAt: admin.firestore.Timestamp;
+            roleHistory: admin.firestore.FieldValue;
+            additionalData?: {
+                technicianId?: string;
+                department?: string;
+                supervisor?: string;
+                managedWorkers?: string[];
+                adminSince?: admin.firestore.FieldValue;
+            };
+        } = {
             role: newRole,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.Timestamp.now(),
             roleHistory: admin.firestore.FieldValue.arrayUnion({
                 fromRole: currentRole,
                 toRole: newRole,
-                changedAt: admin.firestore.FieldValue.serverTimestamp(),
+                changedAt: admin.firestore.Timestamp.now(),
                 changedBy: decodedToken.uid,
                 reason: options.reason || 'Role change via admin panel'
             })

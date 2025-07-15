@@ -49,6 +49,12 @@ export async function POST(request: NextRequest) {
             existingUser = await admin.auth().getUserByEmail(email);
         } catch (error) {
             // User doesn't exist, which is fine for invitations
+            console.log('User does not exist');
+            console.log(error);
+            return NextResponse.json(
+                { error: "User does not exist" },
+                { status: 400 }
+            );
         }
 
         if (existingUser) {
