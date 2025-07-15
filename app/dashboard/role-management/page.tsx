@@ -7,26 +7,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { 
-    Users, 
-    Shield, 
-    UserCheck, 
-    UserX, 
-    AlertTriangle, 
-    Mail, 
+import { Timestamp } from "firebase/firestore";
+import {
+    Users,
+    Shield,
+    Mail,
     Search,
-    MoreHorizontal,
     Crown,
     Wrench,
     User
 } from "lucide-react";
+import RoleManagementDialog from "@/components/dialogs/role-management";
 
 interface UserProfile {
     uid: string;
@@ -34,8 +27,8 @@ interface UserProfile {
     displayName: string;
     role: 'admin' | 'worker' | 'client';
     isActive: boolean;
-    createdAt: any;
-    lastLoginAt?: any;
+    createdAt: Timestamp;
+    lastLoginAt?: Timestamp;
 }
 
 interface UserDependencies {
@@ -68,6 +61,12 @@ export default function RoleManagementPage() {
     const [inviteEmail, setInviteEmail] = useState("");
     const [loadingInvite, setLoadingInvite] = useState(false);
 
+    useEffect(() => {
+        if (user && userRole === 'admin') {
+            loadUsers();
+        }
+    }, [user, userRole]);
+
     // Only admins can access this page
     if (userRole !== 'admin') {
         return (
@@ -98,7 +97,7 @@ export default function RoleManagementPage() {
                     'Authorization': `Bearer ${await user?.getIdToken()}`
                 }
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 setUsers(data.users || []);
@@ -212,15 +211,11 @@ export default function RoleManagementPage() {
         }
     };
 
-    useEffect(() => {
-        if (user && userRole === 'admin') {
-            loadUsers();
-        }
-    }, [user, userRole]);
+
 
     const filteredUsers = users.filter(u => {
         const matchesSearch = u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             u.displayName.toLowerCase().includes(searchTerm.toLowerCase());
+            u.displayName.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesRole = roleFilter === "all" || u.role === roleFilter;
         return matchesSearch && matchesRole;
     });
@@ -284,7 +279,7 @@ export default function RoleManagementPage() {
             <Card>
                 <CardContent className="pt-6">
                     <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1">
+                        <div className="flex-1 space-y-2">
                             <Label htmlFor="search">Search Users</Label>
                             <div className="relative">
                                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -297,7 +292,7 @@ export default function RoleManagementPage() {
                                 />
                             </div>
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <Label>Filter by Role</Label>
                             <Select value={roleFilter} onValueChange={setRoleFilter}>
                                 <SelectTrigger className="w-[180px]">
@@ -349,137 +344,25 @@ export default function RoleManagementPage() {
                                             </Badge>
                                         )}
                                     </div>
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm"
-                                                onClick={() => {
-                                                    setSelectedUser(user);
-                                                    checkUserDependencies(user);
-                                                }}
-                                            >
-                                                <MoreHorizontal className="w-4 h-4" />
-                                                Manage Role
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-2xl">
-                                            <DialogHeader>
-                                                <DialogTitle>Manage User Role</DialogTitle>
-                                                <DialogDescription>
-                                                    Change role for {selectedUser?.displayName} ({selectedUser?.email})
-                                                </DialogDescription>
-                                            </DialogHeader>
-
-                                            {loadingDependencies ? (
-                                                <div className="py-8 text-center">Checking user dependencies...</div>
-                                            ) : dependencies ? (
-                                                <div className="space-y-4">
-                                                    {/* Current Status */}
-                                                    <div>
-                                                        <Label>Current Role</Label>
-                                                        <div className="mt-1">
-                                                            <Badge variant={getRoleBadgeVariant(dependencies.currentRole)}>
-                                                                {dependencies.currentRole}
-                                                            </Badge>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Dependencies Warning */}
-                                                    {dependencies.blockingFactors.length > 0 && (
-                                                        <Alert>
-                                                            <AlertTriangle className="h-4 w-4" />
-                                                            <AlertDescription>
-                                                                <div className="space-y-1">
-                                                                    <div className="font-medium">Potential Issues:</div>
-                                                                    {dependencies.blockingFactors.map((factor, index) => (
-                                                                        <div key={index} className="text-sm">• {factor}</div>
-                                                                    ))}
-                                                                </div>
-                                                            </AlertDescription>
-                                                        </Alert>
-                                                    )}
-
-                                                    {/* New Role Selection */}
-                                                    <div>
-                                                        <Label>New Role</Label>
-                                                        <Select value={newRole} onValueChange={setNewRole}>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Select new role" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                <SelectItem value="admin">Admin</SelectItem>
-                                                                <SelectItem value="worker">Worker</SelectItem>
-                                                                <SelectItem value="client">Client</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
-
-                                                    {/* Reason */}
-                                                    <div>
-                                                        <Label>Reason for Change</Label>
-                                                        <Textarea
-                                                            placeholder="Why is this role change needed?"
-                                                            value={reason}
-                                                            onChange={(e) => setReason(e.target.value)}
-                                                        />
-                                                    </div>
-
-                                                    {/* Options */}
-                                                    <div className="space-y-2">
-                                                        {dependencies.hasActiveJobs && (
-                                                            <div className="flex items-center space-x-2">
-                                                                <Checkbox
-                                                                    id="force"
-                                                                    checked={forceChange}
-                                                                    onCheckedChange={(checked) => setForceChange(checked as boolean)}
-                                                                />
-                                                                <Label htmlFor="force" className="text-sm">
-                                                                    Force change despite active jobs
-                                                                </Label>
-                                                            </div>
-                                                        )}
-
-                                                        {dependencies.hasCustomerRecord && (
-                                                            <div className="flex items-center space-x-2">
-                                                                <Checkbox
-                                                                    id="migrate"
-                                                                    checked={migrateCustomerData}
-                                                                    onCheckedChange={(checked) => setMigrateCustomerData(checked as boolean)}
-                                                                />
-                                                                <Label htmlFor="migrate" className="text-sm">
-                                                                    Migrate customer data
-                                                                </Label>
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Action Buttons */}
-                                                    <div className="flex gap-2 pt-4">
-                                                        <Button
-                                                            onClick={handleRoleChange}
-                                                            disabled={!newRole || newRole === dependencies.currentRole}
-                                                        >
-                                                            Change Role
-                                                        </Button>
-                                                        <Button
-                                                            variant="outline"
-                                                            onClick={() => {
-                                                                setSelectedUser(null);
-                                                                setDependencies(null);
-                                                                setNewRole("");
-                                                                setReason("");
-                                                                setForceChange(false);
-                                                                setMigrateCustomerData(false);
-                                                            }}
-                                                        >
-                                                            Cancel
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            ) : null}
-                                        </DialogContent>
-                                    </Dialog>
+                                    <RoleManagementDialog
+                                        user={user}
+                                        checkUserDependencies={checkUserDependencies}
+                                        setSelectedUser={setSelectedUser}
+                                        selectedUser={selectedUser}
+                                        setDependencies={setDependencies}
+                                        dependencies={dependencies}
+                                        loadingDependencies={loadingDependencies}
+                                        newRole={newRole}
+                                        setNewRole={setNewRole}
+                                        reason={reason}
+                                        setReason={setReason}
+                                        forceChange={forceChange}
+                                        setForceChange={setForceChange}
+                                        migrateCustomerData={migrateCustomerData}
+                                        setMigrateCustomerData={setMigrateCustomerData}
+                                        handleRoleChange={handleRoleChange}
+                                        getRoleBadgeVariant={getRoleBadgeVariant}
+                                    />
                                 </div>
                             ))}
                         </div>
