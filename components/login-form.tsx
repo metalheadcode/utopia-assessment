@@ -56,7 +56,7 @@ export function LoginForm({
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold mb-3">Hi there! 👋🏻</h1>
                 <p className="text-balance text-black/70 mb-1">
-                  Login to your SejookNamatey account
+                  Login to your SejookNamastey account
                 </p>
                 <small className="text-muted-foreground text-xs">by Sejuk Sejuk Services Sdn Bhd</small>
               </div>

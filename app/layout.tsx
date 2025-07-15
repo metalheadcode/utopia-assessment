@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SejookNamatey",
-  description: "SejookNamatey: Dashboard for Sejuk Sejuk Services Sdn Bhd, made by @metalheadcode",
+  title: "SejookNamastey",
+  description: "SejookNamastey: Dashboard for Sejuk Sejuk Services Sdn Bhd, made by @metalheadcode",
 };
 
 export default function RootLayout({
