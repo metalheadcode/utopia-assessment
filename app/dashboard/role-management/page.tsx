@@ -20,6 +20,7 @@ import {
     User
 } from "lucide-react";
 import RoleManagementDialog from "@/components/dialogs/role-management";
+import UserDeletionDialog from "@/components/dialogs/user-deletion";
 
 interface UserProfile {
     uid: string;
@@ -344,25 +345,32 @@ export default function RoleManagementPage() {
                                             </Badge>
                                         )}
                                     </div>
-                                    <RoleManagementDialog
-                                        user={user}
-                                        checkUserDependencies={checkUserDependencies}
-                                        setSelectedUser={setSelectedUser}
-                                        selectedUser={selectedUser}
-                                        setDependencies={setDependencies}
-                                        dependencies={dependencies}
-                                        loadingDependencies={loadingDependencies}
-                                        newRole={newRole}
-                                        setNewRole={setNewRole}
-                                        reason={reason}
-                                        setReason={setReason}
-                                        forceChange={forceChange}
-                                        setForceChange={setForceChange}
-                                        migrateCustomerData={migrateCustomerData}
-                                        setMigrateCustomerData={setMigrateCustomerData}
-                                        handleRoleChange={handleRoleChange}
-                                        getRoleBadgeVariant={getRoleBadgeVariant}
-                                    />
+                                    <div className="flex gap-2">
+                                        <RoleManagementDialog
+                                            user={user}
+                                            checkUserDependencies={checkUserDependencies}
+                                            setSelectedUser={setSelectedUser}
+                                            selectedUser={selectedUser}
+                                            setDependencies={setDependencies}
+                                            dependencies={dependencies}
+                                            loadingDependencies={loadingDependencies}
+                                            newRole={newRole}
+                                            setNewRole={setNewRole}
+                                            reason={reason}
+                                            setReason={setReason}
+                                            forceChange={forceChange}
+                                            setForceChange={setForceChange}
+                                            migrateCustomerData={migrateCustomerData}
+                                            setMigrateCustomerData={setMigrateCustomerData}
+                                            handleRoleChange={handleRoleChange}
+                                            getRoleBadgeVariant={getRoleBadgeVariant}
+                                        />
+                                        <UserDeletionDialog
+                                            user={user}
+                                            onUserDeleted={loadUsers}
+                                            getRoleBadgeVariant={getRoleBadgeVariant}
+                                        />
+                                    </div>
                                 </div>
                             ))}
                         </div>

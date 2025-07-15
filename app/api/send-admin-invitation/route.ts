@@ -47,18 +47,8 @@ export async function POST(request: NextRequest) {
         let existingUser = null;
         try {
             existingUser = await admin.auth().getUserByEmail(email);
-        } catch (error) {
-            // User doesn't exist, which is fine for invitations
-            console.log('User does not exist');
-            console.log(error);
-            return NextResponse.json(
-                { error: "User does not exist" },
-                { status: 400 }
-            );
-        }
-
-        if (existingUser) {
-            // Check current role
+            
+            // If user exists, check if they're already an admin
             const userProfile = await db.collection('userProfiles').doc(existingUser.uid).get();
             if (userProfile.exists && userProfile.data()?.role === 'admin') {
                 return NextResponse.json(
@@ -66,6 +56,9 @@ export async function POST(request: NextRequest) {
                     { status: 400 }
                 );
             }
+        } catch (error) {
+            // User doesn't exist, which is perfect for invitations
+            console.log('User does not exist - this is fine for invitations');
         }
 
         // Create invitation record

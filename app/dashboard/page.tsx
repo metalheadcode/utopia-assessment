@@ -85,8 +85,13 @@ export default function DashboardPage() {
         const { query, where } = await import('firebase/firestore');
         const clientOrdersQuery = query(ordersRef, where("customerEmail", "==", user.email));
         ordersSnapshot = await getDocs(clientOrdersQuery);
+      } else if (userRole === 'worker') {
+        // Workers can only see orders assigned to them
+        const { query, where } = await import('firebase/firestore');
+        const workerOrdersQuery = query(ordersRef, where("assignedTechnician", "==", user.uid));
+        ordersSnapshot = await getDocs(workerOrdersQuery);
       } else {
-        // Admins and workers can see all orders
+        // Admins can see all orders
         ordersSnapshot = await getDocs(ordersRef);
       }
       

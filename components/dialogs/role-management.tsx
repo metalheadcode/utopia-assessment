@@ -108,7 +108,7 @@ export default function RoleManagementDialog({ user, checkUserDependencies, setS
                         )}
 
                         {/* New Role Selection */}
-                        <div>
+                        <div className="space-y-2">
                             <Label>New Role</Label>
                             <Select value={newRole} onValueChange={setNewRole}>
                                 <SelectTrigger>
@@ -123,7 +123,7 @@ export default function RoleManagementDialog({ user, checkUserDependencies, setS
                         </div>
 
                         {/* Reason */}
-                        <div>
+                        <div className="space-y-2">
                             <Label>Reason for Change</Label>
                             <Textarea
                                 placeholder="Why is this role change needed?"

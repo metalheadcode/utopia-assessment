@@ -349,26 +349,55 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     const idTokenResult = await user.getIdTokenResult();
                     let role = idTokenResult.claims.role as "admin" | "worker" | "client" || null;
                     
-                    // If user has no role (new user), automatically assign "client" role
+                    // If user has no role (new user), check for pending admin invitations first
                     if (!role && user.email) {
-                        console.log('New user detected, assigning client role:', user.email);
+                        console.log('New user detected, checking for admin invitations:', user.email);
                         
                         try {
-                            // Set role to "client" for new users
-                            await createClientRole(
-                                user.uid, 
-                                user.email, 
-                                user.displayName || user.email.split('@')[0]
-                            );
+                            // Check for pending admin role
+                            const pendingAdminResponse = await fetch(`/api/check-pending-admin-role?email=${encodeURIComponent(user.email)}`);
+                            const pendingAdminData = await pendingAdminResponse.json();
                             
-                            // Force refresh token to get updated claims
-                            await user.getIdToken(true);
-                            const updatedTokenResult = await user.getIdTokenResult();
-                            role = updatedTokenResult.claims.role as "admin" | "worker" | "client" || null;
-                            
-                            console.log('Client role assigned successfully to:', user.email);
+                            if (pendingAdminResponse.ok && pendingAdminData.hasPendingRole) {
+                                console.log('Found pending admin role for:', user.email);
+                                
+                                // Assign admin role
+                                await createAdminRole(
+                                    user.uid, 
+                                    user.email, 
+                                    user.displayName || user.email.split('@')[0]
+                                );
+                                
+                                // Mark pending role as completed
+                                await fetch('/api/complete-pending-admin-role', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email: user.email, uid: user.uid })
+                                });
+                                
+                                // Force refresh token to get updated claims
+                                await user.getIdToken(true);
+                                const updatedTokenResult = await user.getIdTokenResult();
+                                role = updatedTokenResult.claims.role as "admin" | "worker" | "client" || null;
+                                
+                                console.log('Admin role assigned successfully to invited user:', user.email);
+                            } else {
+                                // No pending admin role, assign default client role
+                                await createClientRole(
+                                    user.uid, 
+                                    user.email, 
+                                    user.displayName || user.email.split('@')[0]
+                                );
+                                
+                                // Force refresh token to get updated claims
+                                await user.getIdToken(true);
+                                const updatedTokenResult = await user.getIdTokenResult();
+                                role = updatedTokenResult.claims.role as "admin" | "worker" | "client" || null;
+                                
+                                console.log('Client role assigned successfully to:', user.email);
+                            }
                         } catch (error) {
-                            console.error('Error assigning client role to new user:', error);
+                            console.error('Error processing new user role assignment:', error);
                             // Continue with null role to prevent blocking
                         }
                     }
