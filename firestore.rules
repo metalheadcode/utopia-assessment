@@ -125,11 +125,12 @@ service cloud.firestore {
       // Read: 
       // - Admins can read all orders
       // - Workers can read orders assigned to them
-      // - Clients can read their own orders
+      // - Clients can read orders where they are the customer (by email or submittedBy)
       allow read: if isAuthenticated() && 
                      (isAdmin() || 
                       (isWorker() && resource.data.assignedTechnician == request.auth.uid) ||
-                      (isClient() && resource.data.submittedBy == request.auth.uid));
+                      (isClient() && (resource.data.submittedBy == request.auth.uid || 
+                                     resource.data.customerEmail == request.auth.token.email)));
       
       // Create: Admins and clients can create orders
       allow create: if isAuthenticated() && 

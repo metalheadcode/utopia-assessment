@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/app/context/auth-context";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -9,19 +9,34 @@ export function EmailLinkHandler() {
     const { isEmailLink, signInWithEmailLink } = useAuth();
     const router = useRouter();
     const [isProcessing, setIsProcessing] = useState(false);
+    const hasTriedProcessing = useRef(false);
 
     useEffect(() => {
         const handleEmailLink = async () => {
+            // Prevent multiple executions
+            if (hasTriedProcessing.current || isProcessing) {
+                return;
+            }
+
             // Check if the current URL is an email link
             if (isEmailLink(window.location.href)) {
+                hasTriedProcessing.current = true;
                 setIsProcessing(true);
 
                 try {
-                    // Try to get the email from localStorage first
-                    let email = window.localStorage.getItem('emailForSignIn');
+                    // Try to get email from multiple sources (best UX first)
+                    let email = null;
 
-                    // If no email in localStorage, prompt the user for their email
-                    // This handles customer invitation emails where they didn't use the login form
+                    // 1. First try to get email from URL query string (best UX - no user input needed)
+                    const urlParams = new URLSearchParams(window.location.search);
+                    email = urlParams.get('email');
+
+                    // 2. If not in URL, try localStorage (for manual login flow)
+                    if (!email) {
+                        email = window.localStorage.getItem('emailForSignIn');
+                    }
+
+                    // 3. Last resort: prompt user (worst UX but necessary fallback)
                     if (!email) {
                         email = prompt("Please enter your email address to complete the sign-in:");
                         
@@ -56,7 +71,7 @@ export function EmailLinkHandler() {
         };
 
         handleEmailLink();
-    }, [isEmailLink, signInWithEmailLink, router]);
+    }, [isEmailLink, signInWithEmailLink, router, isProcessing]);
 
     if (isProcessing) {
         return (

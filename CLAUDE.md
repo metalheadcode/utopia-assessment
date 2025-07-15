@@ -24,6 +24,7 @@ This project uses **Yarn 1.22.22** as specified in `package.json`. Always use `y
 - **React Hook Form + Zod** for form handling and validation
 - **Resend** for email notifications
 - **WhatsApp integration** for notifications
+- **Recharts** for dashboard analytics and data visualization
 
 ### Core Architecture
 
@@ -38,18 +39,24 @@ This project uses **Yarn 1.22.22** as specified in `package.json`. Always use `y
 #### Application Structure
 ```
 app/
-├── api/                    # API routes
-│   ├── email/             # Email notification endpoint
-│   ├── set-user-role/     # Role management endpoint
-│   └── whatsapp/          # WhatsApp integration endpoint
-├── context/               # React contexts
-│   ├── auth-context.tsx   # Authentication state management
-│   └── whatsapp.tsx       # WhatsApp context
-├── dashboard/             # Protected dashboard area
-│   ├── jobs/              # Worker job management
-│   ├── orders/            # Order management
-│   └── submit-order/      # Order creation
-└── login/                 # Authentication flow
+├── api/                         # API routes
+│   ├── create-customer-user/    # Customer user creation endpoint
+│   ├── create-user-profile/     # User profile management endpoint
+│   ├── create-worker/           # Worker creation endpoint
+│   ├── email/                   # Email notification endpoint
+│   ├── send-customer-login-link/# Customer login link generation
+│   ├── set-user-role/           # Role management endpoint
+│   └── whatsapp/                # WhatsApp integration endpoint
+├── context/                     # React contexts
+│   ├── auth-context.tsx         # Authentication state management
+│   └── whatsapp.tsx             # WhatsApp context
+├── dashboard/                   # Protected dashboard area
+│   ├── create-new-worker/       # Worker creation page
+│   ├── jobs/                    # Worker job management
+│   ├── orders/                  # Order management
+│   ├── submit-order/            # Order creation with customer management
+│   └── worker-list/             # Worker management page
+└── login/                       # Authentication flow
 ```
 
 #### Component Organization
@@ -65,15 +72,20 @@ app/
 
 #### Key Features
 1. **Role-based Navigation**: Sidebar content changes based on user role
-2. **Job Management**: Workers can take and complete jobs
-3. **Order Tracking**: Full order lifecycle management
-4. **Notification System**: WhatsApp and email notifications for job completion
-5. **Malaysia Address Support**: Malaysia-specific postcode integration
+2. **Job Management**: Workers can take and complete jobs with enhanced UI
+3. **Order Tracking**: Full order lifecycle management with customer integration
+4. **Customer Management**: Customer user creation and email-based authentication
+5. **Worker Management**: Admin tools for creating and managing workers
+6. **Dashboard Analytics**: Worker performance charts and job distribution metrics
+7. **Notification System**: WhatsApp and email notifications for job completion
+8. **Email Authentication**: Enhanced passwordless login with customer support
+9. **Malaysia Address Support**: Malaysia-specific postcode integration
 
 ### User Roles & Permissions
-- **Admin**: Full access to submit orders, view all orders
-- **Worker**: Access to jobs, can take and complete assignments
-- **Client**: Limited access (future implementation)
+- **Admin**: Full access to submit orders, view all orders, create workers, manage customers
+- **Worker**: Access to jobs, can take and complete assignments, view assigned orders
+- **Client**: Limited access with email-based authentication for order visibility
+- **Customer**: Email-based login access for order tracking (implemented)
 
 ### Firebase Configuration
 - Client config in `firebase/root.ts`
@@ -104,4 +116,33 @@ app/
 - Mobile-responsive design patterns
 
 ### Testing
-- No specific test framework configured - check with user for testing approach
+- **Jest 30.0.0-alpha.7** with React Testing Library for component testing
+- **GitHub Actions** workflow configured for CI/CD
+- Test commands: `yarn test`, `yarn test:watch`, `yarn test:coverage`
+- Mock setup for Firebase, Next.js router, and application services
+
+## Recent Enhancements
+
+### Customer Management System
+- **Customer User Creation**: API endpoint for creating customer accounts
+- **Email-based Authentication**: Passwordless login system for customers
+- **Customer Login Links**: Dedicated API for generating customer login links
+- **Order Access Control**: Enhanced Firestore rules for customer order visibility
+- **Email Validation**: Client-side email format validation and error handling
+
+### Dashboard Analytics
+- **Performance Charts**: Worker performance visualization using Recharts
+- **Job Distribution**: Status-based job distribution charts and metrics
+- **Enhanced UI**: Improved loading states and responsive design
+- **Worker Management**: Admin tools for creating and managing technicians
+
+### Email System Improvements
+- **Enhanced Error Handling**: Better feedback for email sending failures
+- **User Experience**: Improved prompts for email input and validation
+- **Success/Warning Messages**: Clear feedback for email operations
+- **Auto-fill Capabilities**: Customer selection with form auto-population
+
+### Firestore Security Updates
+- **Role-based Access**: Updated rules for customer email-based access
+- **Order Permissions**: Changed from 'submittedBy' to 'assignedTechnician' logic
+- **Customer Integration**: Support for customer order visibility
