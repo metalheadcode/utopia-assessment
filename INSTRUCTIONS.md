@@ -1,6 +1,6 @@
-# 📋 SejookNamatey Dashboard - User Instructions
+# 📋 SejookNamastey Dashboard - User Instructions
 
-Welcome to **SejookNamatey**, the digital service management system for Sejuk Sejuk Service Sdn Bhd! This guide will help you understand how to use the dashboard based on your role.
+Welcome to **SejookNamastey**, the digital service management system for Sejuk Sejuk Service Sdn Bhd! This guide will help you understand how to use the dashboard based on your role.
 
 ---
 
@@ -266,6 +266,6 @@ If you need help:
 
 ---
 
-**Happy working with SejookNamatey! 🌟**
+**Happy working with SejookNamastey! 🌟**
 
 *Making AC service management super cool! ❄️*

@@ -18,7 +18,7 @@ export default function Home() {
                 <span className="text-white font-bold text-xl">S</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-stone-900">SejookNamatey</h1>
+                <h1 className="text-xl font-bold text-stone-900">SejookNamastey</h1>
                 <p className="text-sm text-stone-600">Sejuk Sejuk Service Sdn Bhd</p>
               </div>
             </div>
@@ -46,7 +46,7 @@ export default function Home() {
             <span className="text-stone-700 block">Management System</span>
           </h1>
           <p className="text-xl text-stone-600 mb-8 max-w-2xl mx-auto">
-            Complete assessment solution built with Next.js, TypeScript, and Firebase. 
+            Complete assessment solution built with Next.js, TypeScript, and Firebase.
             Features admin portal, technician management, notifications, and analytics dashboard.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -63,7 +63,7 @@ export default function Home() {
               </Button>
             </a>
           </div>
-          
+
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Badge variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50">
               <CheckCircle className="w-3 h-3 mr-1" />
@@ -94,7 +94,7 @@ export default function Home() {
               All required modules plus bonus features implemented with modern technologies and best practices
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <Card className="hover:shadow-lg transition-shadow border-emerald-200 bg-white">
               <CardHeader>
@@ -188,7 +188,7 @@ export default function Home() {
               Modern, production-ready technologies used to build a scalable and maintainable system
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -197,7 +197,7 @@ export default function Home() {
               <h3 className="text-lg font-semibold text-stone-900 mb-2">Next.js 15 + TypeScript</h3>
               <p className="text-stone-600 text-sm">App Router, server components, and strict type safety</p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Database className="w-8 h-8 text-amber-700" />
@@ -205,7 +205,7 @@ export default function Home() {
               <h3 className="text-lg font-semibold text-stone-900 mb-2">Firebase Suite</h3>
               <p className="text-stone-600 text-sm">Authentication, Firestore, and real-time updates</p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Zap className="w-8 h-8 text-stone-600" />
@@ -213,7 +213,7 @@ export default function Home() {
               <h3 className="text-lg font-semibold text-stone-900 mb-2">Tailwind + shadcn/ui</h3>
               <p className="text-stone-600 text-sm">Modern styling with reusable component library</p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-emerald-600" />
@@ -221,7 +221,7 @@ export default function Home() {
               <h3 className="text-lg font-semibold text-stone-900 mb-2">React Hook Form + Zod</h3>
               <p className="text-stone-600 text-sm">Type-safe form validation and error handling</p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-8 h-8 text-blue-600" />
@@ -229,7 +229,7 @@ export default function Home() {
               <h3 className="text-lg font-semibold text-stone-900 mb-2">Email + WhatsApp</h3>
               <p className="text-stone-600 text-sm">Resend for emails, WhatsApp API for notifications</p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Star className="w-8 h-8 text-orange-600" />
@@ -250,7 +250,7 @@ export default function Home() {
               Explore the key features and interfaces built for this assessment
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="hover:shadow-lg transition-shadow bg-white border-stone-200">
               <CardHeader>
@@ -426,7 +426,7 @@ export default function Home() {
               Modern, scalable architecture designed for real-world business operations
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -439,7 +439,7 @@ export default function Home() {
                   <li>• <strong>Responsive design</strong> for mobile and desktop</li>
                 </ul>
               </div>
-              
+
               <div className="bg-white p-6 rounded-lg shadow-sm">
                 <h3 className="text-lg font-semibold text-stone-900 mb-3">Backend Services</h3>
                 <ul className="space-y-2 text-sm text-stone-600">
@@ -451,7 +451,7 @@ export default function Home() {
                 </ul>
               </div>
             </div>
-            
+
             <div className="space-y-6">
               <div className="bg-white p-6 rounded-lg shadow-sm">
                 <h3 className="text-lg font-semibold text-stone-900 mb-3">Key Features</h3>
@@ -463,7 +463,7 @@ export default function Home() {
                   <li>• <strong>Audit Logging</strong> for compliance</li>
                 </ul>
               </div>
-              
+
               <div className="bg-white p-6 rounded-lg shadow-sm">
                 <h3 className="text-lg font-semibold text-stone-900 mb-3">Security & Performance</h3>
                 <ul className="space-y-2 text-sm text-stone-600">
@@ -476,7 +476,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          
+
           <div className="mt-12 text-center">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-4xl mx-auto">
               <h3 className="text-lg font-semibold text-blue-900 mb-2">Workflow Implementation</h3>
@@ -510,7 +510,7 @@ export default function Home() {
           <p className="text-stone-200 mb-8 max-w-2xl mx-auto">
             Experience the full assessment solution. Generate an admin invitation to access all features and explore the complete system.
           </p>
-          
+
           <div className="flex flex-col lg:flex-row gap-8 items-center justify-center">
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/login">
@@ -526,7 +526,7 @@ export default function Home() {
                 </Button>
               </a>
             </div>
-            
+
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
               <div className="text-white mb-4">
                 <h3 className="text-lg font-semibold mb-2">Generate Admin Access</h3>
@@ -535,7 +535,7 @@ export default function Home() {
               <AdminInvitationForm />
             </div>
           </div>
-          
+
           <div className="mt-12 grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="flex items-center justify-center space-x-3">
               <CheckCircle className="w-5 h-5 text-stone-200" />
@@ -544,7 +544,7 @@ export default function Home() {
                 <p className="text-stone-200">3 Core + Bonus Features</p>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-center space-x-3">
               <Code className="w-5 h-5 text-stone-200" />
               <div className="text-left">
@@ -552,7 +552,7 @@ export default function Home() {
                 <p className="text-stone-200">Next.js 15 + TypeScript</p>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-center space-x-3">
               <Github className="w-5 h-5 text-stone-200" />
               <div className="text-left">
@@ -582,7 +582,7 @@ export default function Home() {
                 Complete service management system demonstrating modern web development skills and best practices.
               </p>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Technologies</h4>
               <ul className="space-y-2 text-sm text-stone-400">
@@ -592,7 +592,7 @@ export default function Home() {
                 <li>React Hook Form + Zod</li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Features</h4>
               <ul className="space-y-2 text-sm text-stone-400">
@@ -602,7 +602,7 @@ export default function Home() {
                 <li>Analytics Dashboard</li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Developer</h4>
               <div className="space-y-2 text-sm text-stone-400">
@@ -612,7 +612,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          
+
           <div className="border-t border-stone-800 mt-8 pt-8 text-center text-sm text-stone-400">
             <p>&copy; 2024 Assessment Portfolio by @metalheadcode. Built for evaluation purposes.</p>
           </div>

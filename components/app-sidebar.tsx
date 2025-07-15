@@ -126,7 +126,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <AirVent className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">SejookNamatey</span>
+                  <span className="truncate font-medium">SejookNamastey</span>
                   <span className="truncate text-xs">Sejuk Sejuk Service Sdn Bhd</span>
                 </div>
               </a>

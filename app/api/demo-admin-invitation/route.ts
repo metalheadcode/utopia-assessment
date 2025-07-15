@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         let existingUser = null;
         try {
             existingUser = await admin.auth().getUserByEmail(email);
-            
+
             // If user exists, check if they're already an admin
             const userProfile = await db.collection('userProfiles').doc(existingUser.uid).get();
             if (userProfile.exists && userProfile.data()?.role === 'admin') {
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
             id: invitationId,
             email: email.toLowerCase(),
             invitedBy: 'demo-system',
-            invitedByEmail: 'demo@sejooknamatey.com',
+            invitedByEmail: 'demo@sejooknamastey.com',
             status: 'pending',
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             expiresAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
             targetEmail: email,
             invitationId: invitationId,
             performedBy: 'demo-system',
-            performedByEmail: 'demo@sejooknamatey.com',
+            performedByEmail: 'demo@sejooknamastey.com',
             timestamp: admin.firestore.FieldValue.serverTimestamp(),
             isDemo: true
         });

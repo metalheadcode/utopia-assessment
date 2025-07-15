@@ -116,7 +116,7 @@ export async function POST(request: Request) {
                         </div>
                         
                         <p style="color: #4a5568; margin-top: 30px; font-size: 16px;">
-                            Thank you for choosing SejookNamatey! We appreciate your business.
+                            Thank you for choosing SejookNamastey! We appreciate your business.
                         </p>
                         
                         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
@@ -165,7 +165,7 @@ export async function POST(request: Request) {
                         
                         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
                             <p style="color: #718096; font-size: 14px; margin: 0;">
-                                SejookNamatey Team Management
+                                SejookNamastey Team Management
                             </p>
                         </div>
                     </div>
@@ -191,7 +191,7 @@ export async function POST(request: Request) {
                         <p style="color: #4a5568; margin-bottom: 16px; font-size: 16px;">Hello ${clientName},</p>
                         
                         <p style="color: #4a5568; margin-bottom: 20px; font-size: 16px;">
-                            Welcome to SejookNamatey! We've created an account for you to track your service order status and stay updated on your air conditioning services.
+                            Welcome to SejookNamastey! We've created an account for you to track your service order status and stay updated on your air conditioning services.
                         </p>
                         
                         <div style="background-color: #f7fafc; border-left: 4px solid #4299e1; padding: 20px; margin: 25px 0; border-radius: 6px;">
@@ -220,7 +220,7 @@ export async function POST(request: Request) {
                         </div>
                         
                         <p style="color: #4a5568; margin-top: 30px; font-size: 16px;">
-                            Thank you for choosing SejookNamatey for your air conditioning service needs!
+                            Thank you for choosing SejookNamastey for your air conditioning service needs!
                         </p>
                         
                         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
@@ -251,7 +251,7 @@ export async function POST(request: Request) {
                         <p style="color: #4a5568; margin-bottom: 16px; font-size: 16px;">Hello ${clientName},</p>
                         
                         <p style="color: #4a5568; margin-bottom: 20px; font-size: 16px;">
-                            You've been invited by <strong>${inviterName}</strong> to join the SejookNamatey dashboard as an administrator.
+                            You've been invited by <strong>${inviterName}</strong> to join the SejookNamastey dashboard as an administrator.
                         </p>
                         
                         <div style="background-color: #fff8e1; border-left: 4px solid #ffc107; padding: 20px; margin: 25px 0; border-radius: 6px;">
@@ -287,7 +287,7 @@ export async function POST(request: Request) {
                         
                         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
                             <p style="color: #718096; font-size: 14px; margin: 0;">
-                                SejookNamatey - Air Conditioning Services Management
+                                SejookNamastey - Air Conditioning Services Management
                             </p>
                             <p style="color: #718096; font-size: 12px; margin: 5px 0 0 0;">
                                 Invitation ID: ${invitationId}
@@ -299,7 +299,7 @@ export async function POST(request: Request) {
         }
 
         const { data, error } = await resend.emails.send({
-            from: 'SejookNamatey <mail@noreply.dexon.dev>',
+            from: 'SejookNamastey <mail@noreply.dexon.dev>',
             to: [to],
             subject: subject,
             html,
