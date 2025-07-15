@@ -6,12 +6,11 @@ import { LoginForm } from './login-form'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
-import { Input } from './ui/input'
-import { Label } from './ui/label'
 import { Alert, AlertDescription } from './ui/alert'
 import { Crown, Mail, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/app/context/auth-context'
+import { Timestamp } from 'firebase/firestore'
 
 interface AdminInvitation {
     id: string
@@ -19,15 +18,15 @@ interface AdminInvitation {
     invitedBy: string
     invitedByEmail: string
     status: 'pending' | 'accepted' | 'expired'
-    createdAt: any
-    expiresAt: any
+    createdAt: Timestamp
+    expiresAt: Timestamp
 }
 
 export function AdminInvitationLogin() {
     const searchParams = useSearchParams()
     const invitationId = searchParams.get('invitation')
     const { sendLoginLink } = useAuth()
-    
+
     const [invitation, setInvitation] = useState<AdminInvitation | null>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -43,13 +42,13 @@ export function AdminInvitationLogin() {
         try {
             setLoading(true)
             setError(null)
-            
+
             const response = await fetch(`/api/get-admin-invitation?id=${id}`)
             const data = await response.json()
-            
+
             if (response.ok) {
                 setInvitation(data.invitation)
-                
+
                 // Check if invitation is expired
                 let expiryDate: Date | null = null;
                 if (data.invitation.expiresAt) {
@@ -61,7 +60,7 @@ export function AdminInvitationLogin() {
                         expiryDate = data.invitation.expiresAt;
                     }
                 }
-                
+
                 if (data.invitation.status === 'expired' || (expiryDate && expiryDate < new Date())) {
                     setError('This invitation has expired. Please contact the admin for a new invitation.')
                 } else if (data.invitation.status === 'accepted') {
@@ -83,10 +82,10 @@ export function AdminInvitationLogin() {
 
         try {
             setAcceptingInvitation(true)
-            
+
             // Send login link for the invited email
             await sendLoginLink(invitation.email)
-            
+
             // Mark invitation as accepted
             const response = await fetch('/api/accept-admin-invitation', {
                 method: 'POST',
@@ -138,7 +137,7 @@ export function AdminInvitationLogin() {
                     ) : invitation ? (
                         <div className="space-y-4">
                             <div className="text-center">
-                                <h3 className="text-lg font-semibold mb-2">You've been invited to become an admin!</h3>
+                                <h3 className="text-lg font-semibold mb-2">You&apos;ve been invited to become an admin!</h3>
                                 <p className="text-muted-foreground text-sm">
                                     {invitation.invitedByEmail} has invited you to join as an administrator.
                                 </p>
@@ -166,12 +165,12 @@ export function AdminInvitationLogin() {
                                     <Alert>
                                         <Mail className="h-4 w-4" />
                                         <AlertDescription>
-                                            Click "Accept Invitation" to receive a login link at {invitation.email}. 
-                                            You'll automatically be given admin privileges upon first login.
+                                            Click &quot;Accept Invitation&quot; to receive a login link at {invitation.email}.
+                                            You&apos;ll automatically be given admin privileges upon first login.
                                         </AlertDescription>
                                     </Alert>
 
-                                    <Button 
+                                    <Button
                                         onClick={acceptInvitation}
                                         disabled={acceptingInvitation}
                                         className="w-full"

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
         const token = authHeader.replace('Bearer ', '');
         const decodedToken = await admin.auth().verifyIdToken(token);
-        
+
         if (decodedToken.role !== 'admin') {
             return NextResponse.json(
                 { error: "Admin privileges required" },
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         let existingUser = null;
         try {
             existingUser = await admin.auth().getUserByEmail(email);
-            
+
             // If user exists, check if they're already an admin
             const userProfile = await db.collection('userProfiles').doc(existingUser.uid).get();
             if (userProfile.exists && userProfile.data()?.role === 'admin') {
@@ -59,6 +59,11 @@ export async function POST(request: NextRequest) {
         } catch (error) {
             // User doesn't exist, which is perfect for invitations
             console.log('User does not exist - this is fine for invitations');
+            console.log(error);
+            return NextResponse.json(
+                { error: "User does not exist" },
+                { status: 400 }
+            );
         }
 
         // Create invitation record

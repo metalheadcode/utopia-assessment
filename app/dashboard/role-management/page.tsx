@@ -66,6 +66,7 @@ export default function RoleManagementPage() {
         if (user && userRole === 'admin') {
             loadUsers();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, userRole]);
 
     // Only admins can access this page

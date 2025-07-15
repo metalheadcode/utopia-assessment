@@ -9,6 +9,7 @@ import { Input } from "../ui/input";
 import { Trash2, AlertTriangle, Skull, Target } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/app/context/auth-context";
+import { Timestamp } from "firebase/firestore";
 
 interface UserProfile {
     uid: string;
@@ -16,8 +17,8 @@ interface UserProfile {
     displayName: string;
     role: 'admin' | 'worker' | 'client';
     isActive: boolean;
-    createdAt: any;
-    lastLoginAt?: any;
+    createdAt: Timestamp;
+    lastLoginAt?: Timestamp;
 }
 
 interface UserDeletionDialogProps {
@@ -38,7 +39,7 @@ export default function UserDeletionDialog({ user, onUserDeleted, getRoleBadgeVa
 
     const handleDeleteUser = async () => {
         if (!currentUser) return;
-        
+
         if (confirmationText !== expectedConfirmation) {
             toast.error("Confirmation text does not match");
             return;
@@ -62,7 +63,7 @@ export default function UserDeletionDialog({ user, onUserDeleted, getRoleBadgeVa
 
             if (response.ok) {
                 toast.success(`User ${user.email} deleted successfully`);
-                
+
                 // Show deletion results
                 const results = data.deletionResults;
                 const summary = [];
@@ -70,7 +71,7 @@ export default function UserDeletionDialog({ user, onUserDeleted, getRoleBadgeVa
                 if (results.orders > 0) summary.push(`${results.orders} orders`);
                 if (results.assignedJobs > 0) summary.push(`${results.assignedJobs} job assignments`);
                 if (results.delegations > 0) summary.push(`${results.delegations} delegations`);
-                
+
                 if (summary.length > 0) {
                     toast.info(`Also deleted: ${summary.join(', ')}`);
                 }

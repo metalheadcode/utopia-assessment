@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         // Check if invitation is expired
         const now = new Date();
         const expiryDate = invitation?.expiresAt.toDate();
-        
+
         if (expiryDate && expiryDate < now) {
             return NextResponse.json(
                 { error: "Invitation has expired" },
@@ -74,8 +74,8 @@ export async function POST(request: NextRequest) {
         await db.collection('pendingAdminRoles').doc(email.toLowerCase()).set({
             email: email.toLowerCase(),
             invitationId: invitationId,
-            invitedBy: invitation.invitedBy,
-            invitedByEmail: invitation.invitedByEmail,
+            invitedBy: invitation?.invitedBy || '',
+            invitedByEmail: invitation?.invitedByEmail || '',
             acceptedAt: admin.firestore.FieldValue.serverTimestamp(),
             status: 'pending_signup'
         });
