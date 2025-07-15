@@ -56,7 +56,7 @@ interface DashboardMetrics {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth()
+  const { user, userRole } = useAuth()
   // const [orders, setOrders] = useState<Order[]>([])
   const [workerStats, setWorkerStats] = useState<WorkerStats[]>([])
   const [metrics, setMetrics] = useState<DashboardMetrics>({
@@ -76,9 +76,25 @@ export default function DashboardPage() {
     try {
       setLoading(true)
 
-      // Fetch all orders
+      // Fetch orders based on user role
       const ordersRef = collection(db, "orders")
-      const ordersSnapshot = await getDocs(ordersRef)
+      let ordersSnapshot;
+      
+      if (userRole === 'client') {
+        // Clients can only see orders where they are the customer
+        const { query, where } = await import('firebase/firestore');
+        const clientOrdersQuery = query(ordersRef, where("customerEmail", "==", user.email));
+        ordersSnapshot = await getDocs(clientOrdersQuery);
+      } else if (userRole === 'worker') {
+        // Workers can only see orders assigned to them
+        const { query, where } = await import('firebase/firestore');
+        const workerOrdersQuery = query(ordersRef, where("assignedTechnician", "==", user.uid));
+        ordersSnapshot = await getDocs(workerOrdersQuery);
+      } else {
+        // Admins can see all orders
+        ordersSnapshot = await getDocs(ordersRef);
+      }
+      
       const ordersData = ordersSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -132,7 +148,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [user, userRole])
 
   useEffect(() => {
     loadDashboardData()
@@ -194,14 +210,64 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {userRole === 'client' ? 'My Orders' : 'Dashboard'}
+        </h1>
         <p className="text-muted-foreground">
-          Overview of worker performance and job statistics
+          {userRole === 'client' 
+            ? 'Track your air conditioning service orders' 
+            : 'Overview of worker performance and job statistics'
+          }
         </p>
       </div>
 
-      {/* Key Metrics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {userRole === 'client' ? (
+        /* Client View - Simple Order List */
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Service Orders</CardTitle>
+              <CardDescription>
+                Track the status of your air conditioning services
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {metrics.totalJobs === 0 ? (
+                <p className="text-muted-foreground text-center py-8">
+                  No orders found. Contact us to schedule a service.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {/* Simple order statistics for clients */}
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                      <div className="text-2xl font-bold text-yellow-600">{metrics.pendingJobs}</div>
+                      <div className="text-sm text-yellow-700">Pending</div>
+                    </div>
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{metrics.inProgressJobs}</div>
+                      <div className="text-sm text-blue-700">In Progress</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{metrics.completedJobs}</div>
+                      <div className="text-sm text-green-700">Completed</div>
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Total Orders: {metrics.totalJobs} | Total Value: RM {metrics.totalRevenue.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        /* Admin/Worker View - Full Dashboard */
+        <>
+          {/* Key Metrics Cards */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Jobs</CardTitle>
@@ -373,6 +439,8 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   )
 }

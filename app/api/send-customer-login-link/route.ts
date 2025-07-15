@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Generate email sign-in link
+        // Generate email sign-in link with email in query string for better UX
         const actionCodeSettings = {
-            url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+            url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?email=${encodeURIComponent(email)}`,
             handleCodeInApp: true,
         };
 

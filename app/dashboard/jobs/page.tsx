@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { JobService } from "@/lib/job-service";
 import { UserService } from "@/lib/user-service";
 import { DelegationManagement } from "@/components/dialogs/delegation-management";
-import { Clock, User, Wrench, Coins, Map, QuoteIcon } from "lucide-react";
+import { Clock, User, Wrench, Coins, Map, QuoteIcon, Check, Workflow, Hand, Eye, Loader } from "lucide-react";
 
 
 interface Order {
@@ -48,7 +48,8 @@ export default function JobsPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [technicianNames, setTechnicianNames] = useState<Record<string, string>>({});
-
+    const [jobTakenLoading, setJobTakenLoading] = useState(false);
+    const [jobCompletedLoading, setJobCompletedLoading] = useState(false);
     // Function to get technician display name
     const getTechnicianName = (uid: string): string => {
         return technicianNames[uid] || uid.slice(-6); // Fallback to last 6 chars of UID
@@ -57,12 +58,29 @@ export default function JobsPage() {
     const takeJobHandler = async (id: string) => {
         if (!user) return;
 
+        // Find the order to check assignment
+        const order = orders.find(o => o.id === id);
+        if (!order) return;
+
+        // Check if user can take this specific job
+        const targetUid = currentImpersonation ? currentImpersonation.workerUid : user.uid;
+        if (userRole === 'admin' && !currentImpersonation && order.assignedTechnician !== user.uid) {
+            toast.error("You can only take jobs assigned to you. Use impersonation to act as a worker.");
+            return;
+        }
+        if (order.assignedTechnician !== targetUid) {
+            toast.error("This job is not assigned to you.");
+            return;
+        }
+
+        setJobTakenLoading(true);
         try {
             const context = {
                 adminUid: currentImpersonation ? user.uid : undefined,
                 workerUid: currentImpersonation ? currentImpersonation.workerUid : user.uid,
                 isImpersonation: !!currentImpersonation
             };
+
 
             await JobService.takeJob(id, context);
 
@@ -71,15 +89,19 @@ export default function JobsPage() {
                 : "Job taken successfully";
 
             toast.success(message);
-            await loadOrders(); // Refresh orders
         } catch (error) {
             console.error("Error taking job:", error);
             toast.error(error instanceof Error ? error.message : "Failed to take job");
+        } finally {
+            setJobTakenLoading(false);
+            await loadOrders(); // Refresh orders
         }
     }
 
     const completeJobHandler = async (order: Order) => {
         if (!user) return;
+
+        setJobCompletedLoading(true);
 
         try {
             const context = {
@@ -148,6 +170,9 @@ export default function JobsPage() {
             } catch (error) {
                 console.error("Error sending technician notification:", error);
                 toast.warning("Failed to send technician notification");
+            } finally {
+                setJobCompletedLoading(false);
+                await loadOrders(); // Refresh orders
             }
 
             const message = currentImpersonation
@@ -161,11 +186,12 @@ export default function JobsPage() {
                 toast.warning("Failed to send email notification");
             }
 
-            await loadOrders(); // Refresh orders
-
         } catch (error) {
             console.error("Error completing job:", error);
             toast.error(error instanceof Error ? error.message : "Failed to complete job");
+        } finally {
+            setJobCompletedLoading(false);
+            await loadOrders(); // Refresh orders
         }
     };
 
@@ -199,8 +225,11 @@ export default function JobsPage() {
                 ...doc.data()
             })) as Order[];
 
-            // Fetch technician names for all unique technician UIDs
-            const uniqueTechnicianUids = [...new Set(ordersData.map(order => order.assignedTechnician))];
+            // Fetch technician names for all unique technician UIDs (orders + delegations)
+            const orderTechnicianUids = [...new Set(ordersData.map(order => order.assignedTechnician))];
+            const delegationTechnicianUids = availableDelegations.map(d => d.workerUid);
+            const uniqueTechnicianUids = [...new Set([...orderTechnicianUids, ...delegationTechnicianUids])];
+
             const namePromises = uniqueTechnicianUids.map(uid =>
                 UserService.getUserProfile(uid).then(profile => ({
                     uid,
@@ -222,7 +251,7 @@ export default function JobsPage() {
         } finally {
             setLoading(false);
         }
-    }, [user, currentImpersonation, userRole]);
+    }, [user, currentImpersonation, userRole, availableDelegations]);
 
     useEffect(() => {
         loadOrders();
@@ -244,13 +273,6 @@ export default function JobsPage() {
                     <p className="text-muted-foreground">
                         View and manage your assigned jobs
                     </p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
-                    {userRole === 'admin' && <DelegationManagement />}
-                    <div className="text-sm text-muted-foreground">
-                        {orders.length} {orders.length === 1 ? 'job' : 'jobs'}
-                    </div>
                 </div>
             </div>
 
@@ -276,19 +298,63 @@ export default function JobsPage() {
                                 <SelectValue placeholder="Select worker" />
                             </SelectTrigger>
                             <SelectContent>
+                                <DelegationManagement />
                                 <SelectItem value="__none__">None (act as self)</SelectItem>
                                 {availableDelegations.map((delegation) => (
                                     <SelectItem key={delegation.id} value={delegation.id}>
-                                        Worker: {delegation.workerUid}
+                                        {getTechnicianName(delegation.workerUid)}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </div>
                     {currentImpersonation && (
-                        <Badge variant="outline" className="w-full sm:w-auto text-center sm:text-left">
-                            Permissions: {currentImpersonation.permissions.join(', ')}
-                        </Badge>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                            {currentImpersonation.permissions.map((badge, index) => {
+
+                                if (badge === "take_jobs") {
+                                    return (
+                                        <Badge key={index} variant="default">
+                                            <Hand className="w-3 h-3 mr-1" />
+                                            {badge}
+                                        </Badge>
+                                    )
+                                }
+
+                                if (badge === "complete_jobs") {
+                                    return (
+                                        <Badge key={index} variant="default">
+                                            <Check className="w-3 h-3 mr-1" />
+                                            {badge}
+                                        </Badge>
+                                    )
+                                }
+
+                                if (badge === "update_job_status") {
+                                    return (
+                                        <Badge key={index} variant="default">
+                                            <Workflow className="w-3 h-3 mr-1" />
+                                            {badge}
+                                        </Badge>
+                                    )
+                                }
+
+                                if (badge === "view_worker_jobs") {
+                                    return (
+                                        <Badge key={index} variant="default">
+                                            <Eye className="w-3 h-3 mr-1" />
+                                            {badge}
+                                        </Badge>
+                                    )
+                                }
+
+                                return (
+                                    <Badge key={index} variant="default">
+                                        {badge}
+                                    </Badge>
+                                )
+                            })}
+                        </div>
                     )}
                 </div>
             )}
@@ -361,8 +427,10 @@ export default function JobsPage() {
                                     <Button
                                         onClick={() => takeJobHandler(order.id)}
                                         className="w-full"
+                                        disabled={jobTakenLoading}
                                     >
-                                        {currentImpersonation ? `Take Job as ${getTechnicianName(currentImpersonation.workerUid)}` : "Take Job"}
+                                        {jobTakenLoading && <Loader className="w-4 h-4 mr-2 animate-spin" />}
+                                        {jobTakenLoading ? "Taking..." : currentImpersonation ? `Take Job as ${getTechnicianName(currentImpersonation.workerUid)}` : "Take Job"}
                                     </Button>
                                 )}
 
@@ -370,21 +438,24 @@ export default function JobsPage() {
                                     <Button
                                         onClick={() => completeJobHandler(order)}
                                         className="w-full"
+                                        disabled={jobCompletedLoading}
+                                        variant="outline"
                                     >
-                                        {currentImpersonation ? `Complete Job as ${getTechnicianName(currentImpersonation.workerUid)}` : "Mark Completed"}
+                                        {jobCompletedLoading && <Loader className="w-4 h-4 mr-2 animate-spin" />}
+                                        {jobCompletedLoading ? "Completing..." : currentImpersonation ? `Complete Job as ${getTechnicianName(currentImpersonation.workerUid)}` : "Mark Completed"}
                                     </Button>
                                 )}
 
                                 {/* Show admin action indicators */}
                                 {(order as Order & { takenByAdmin?: string }).takenByAdmin && (
-                                    <Badge variant="secondary" className="text-xs">
+                                    <Button variant="secondary" className="text-xs w-full" disabled>
                                         Taken by admin: {getTechnicianName((order as Order & { takenByAdmin?: string }).takenByAdmin!)}
-                                    </Badge>
+                                    </Button>
                                 )}
                                 {(order as Order & { completedByAdmin?: string }).completedByAdmin && (
-                                    <Badge variant="secondary" className="text-xs">
+                                    <Button variant="secondary" className="text-xs w-full" disabled>
                                         Completed by admin: {getTechnicianName((order as Order & { completedByAdmin?: string }).completedByAdmin!)}
-                                    </Badge>
+                                    </Button>
                                 )}
                             </CardFooter>
                         </Card>
