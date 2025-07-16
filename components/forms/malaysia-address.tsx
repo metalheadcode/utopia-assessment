@@ -129,6 +129,7 @@ export default function MalaysiaAddress({ control, name }: MalaysiaAddressProps)
                             <div>
                                 <Label className="text-sm font-medium mb-1 block">Unit Number</Label>
                                 <Input
+                                    aria-label="Unit Number"
                                     placeholder="e.g., 301, A-12-3"
                                     value={addressComponents.unit}
                                     onChange={(e) => handleFieldChange('unit', e.target.value, field.onChange)}
@@ -139,6 +140,7 @@ export default function MalaysiaAddress({ control, name }: MalaysiaAddressProps)
                             <div>
                                 <Label className="text-sm font-medium mb-1 block">Building/Complex</Label>
                                 <Input
+                                    aria-label="Building/Complex"
                                     placeholder="e.g., Apartment Saujana, Taman Desa"
                                     value={addressComponents.building}
                                     onChange={(e) => handleFieldChange('building', e.target.value, field.onChange)}
@@ -149,6 +151,7 @@ export default function MalaysiaAddress({ control, name }: MalaysiaAddressProps)
                             <div>
                                 <Label className="text-sm font-medium mb-1 block">Street</Label>
                                 <Input
+                                    aria-label="Street"
                                     placeholder="e.g., Jalan PJU10/1C"
                                     value={addressComponents.street}
                                     onChange={(e) => handleFieldChange('street', e.target.value, field.onChange)}
@@ -160,6 +163,7 @@ export default function MalaysiaAddress({ control, name }: MalaysiaAddressProps)
                                 <div className="col-span-1 w-full">
                                     <Label className="text-sm font-medium mb-1 block">State <span className="text-red-500">*</span></Label>
                                     <Select
+                                        aria-label="State"
                                         value={addressComponents.state}
                                         onValueChange={(value) => handleStateChange(value, field.onChange)}
                                     >
@@ -180,6 +184,7 @@ export default function MalaysiaAddress({ control, name }: MalaysiaAddressProps)
                                 <div className="col-span-1 w-full">
                                     <Label className="text-sm font-medium mb-1 block">City <span className="text-red-500">*</span></Label>
                                     <Select
+                                        aria-label="City"
                                         disabled={!addressComponents.state}
                                         value={addressComponents.city}
                                         onValueChange={(value) => handleCityChange(value, field.onChange)}
@@ -201,6 +206,7 @@ export default function MalaysiaAddress({ control, name }: MalaysiaAddressProps)
                                 <div className="col-span-1 w-full">
                                     <Label className="text-sm font-medium mb-1 block">Postcode <span className="text-red-500">*</span></Label>
                                     <Select
+                                        aria-label="Postcode"
                                         disabled={!addressComponents.city}
                                         value={addressComponents.postcode}
                                         onValueChange={(value) => handlePostcodeChange(value, field.onChange)}

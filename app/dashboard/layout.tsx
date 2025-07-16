@@ -37,11 +37,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                             />
                             <Breadcrumb>
                                 <BreadcrumbList>
-                                    <BreadcrumbItem className="hidden md:block">
+                                    {formattedTitle !== "Dashboard" && <BreadcrumbItem className="hidden md:block">
                                         <BreadcrumbLink href="/dashboard">
                                             Dashboard
                                         </BreadcrumbLink>
-                                    </BreadcrumbItem>
+                                    </BreadcrumbItem>}
                                     <BreadcrumbSeparator className="hidden md:block" />
                                     <BreadcrumbItem>
                                         <BreadcrumbPage>{formattedTitle}</BreadcrumbPage>
