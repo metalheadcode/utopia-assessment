@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mail, CheckCircle, Clock, Shield, Users, Star, Code, Database, Zap, Github, ExternalLink, Award, Eye, Settings, UserPlus } from "lucide-react";
-import Image from "next/image";
+import { Mail, CheckCircle, Clock, Shield, Users, Star, Code, Database, Zap, Github, ExternalLink, Award, Eye, Settings, UserPlus, AirVent } from "lucide-react";
+import { ClickableImage } from "@/components/ui/clickable-image";
 import AdminInvitationForm from "@/components/admin-invitation-form";
 
 export default function Home() {
@@ -15,7 +15,7 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-stone-800 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">S</span>
+                <AirVent className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-stone-900">SejookNamastey</h1>
@@ -263,14 +263,15 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="relative aspect-video bg-stone-100 rounded-lg overflow-hidden mb-4">
-                  <Image
+                <div className="relative aspect-video bg-stone-100 rounded-lg overflow-hidden">
+                  <ClickableImage
                     src="/screenshots/admin-invitation.webp"
                     alt="Admin invitation interface"
-                    fill
-                    className="object-cover"
+                    width={1000}
+                    height={1000}
                   />
                 </div>
+                <p className="text-[8px] text-stone-600 text-center italic my-2">Scroll up within the frame to zoom in and down to zoom out</p>
                 <ul className="space-y-1 text-sm text-stone-600">
                   <li>• Email-based authentication</li>
                   <li>• Secure one-time login links</li>
@@ -290,14 +291,15 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="relative aspect-video bg-stone-100 rounded-lg overflow-hidden mb-4">
-                  <Image
+                <div className="relative aspect-video bg-stone-100 rounded-lg overflow-hidden">
+                  <ClickableImage
                     src="/screenshots/dashboard.webp"
-                    alt="Dashboard with analytics"
-                    fill
-                    className="object-cover"
+                    alt="Admin invitation interface"
+                    width={1000}
+                    height={1000}
                   />
                 </div>
+                <p className="text-[8px] text-stone-600 text-center italic my-2">Scroll up within the frame to zoom in and down to zoom out</p>
                 <ul className="space-y-1 text-sm text-stone-600">
                   <li>• Performance charts (Recharts)</li>
                   <li>• Real-time statistics</li>
@@ -317,14 +319,15 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="relative aspect-video bg-stone-100 rounded-lg overflow-hidden mb-4">
-                  <Image
+                <div className="relative aspect-video bg-stone-100 rounded-lg overflow-hidden">
+                  <ClickableImage
                     src="/screenshots/role-management.webp"
                     alt="Role management interface"
-                    fill
-                    className="object-cover"
+                    width={1000}
+                    height={1000}
                   />
                 </div>
+                <p className="text-[8px] text-stone-600 text-center italic my-2">Scroll up within the frame to zoom in and down to zoom out</p>
                 <ul className="space-y-1 text-sm text-stone-600">
                   <li>• Fine-grained access control</li>
                   <li>• Dependency checking</li>
@@ -344,14 +347,15 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="relative aspect-video bg-stone-100 rounded-lg overflow-hidden mb-4">
-                  <Image
+                <div className="relative aspect-video bg-stone-100 rounded-lg overflow-hidden">
+                  <ClickableImage
                     src="/screenshots/submit-new-order.webp"
                     alt="Order submission form"
-                    fill
-                    className="object-cover"
+                    width={1000}
+                    height={1000}
                   />
                 </div>
+                <p className="text-[8px] text-stone-600 text-center italic my-2">Scroll up within the frame to zoom in and down to zoom out</p>
                 <ul className="space-y-1 text-sm text-stone-600">
                   <li>• Form validation with Zod</li>
                   <li>• Worker assignment</li>
@@ -371,14 +375,15 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="relative aspect-video bg-stone-100 rounded-lg overflow-hidden mb-4">
-                  <Image
+                <div className="relative aspect-video bg-stone-100 rounded-lg overflow-hidden">
+                  <ClickableImage
                     src="/screenshots/worker-management.webp"
                     alt="Worker management interface"
-                    fill
-                    className="object-cover"
+                    width={1000}
+                    height={1000}
                   />
                 </div>
+                <p className="text-[8px] text-stone-600 text-center italic my-2">Scroll up within the frame to zoom in and down to zoom out</p>
                 <ul className="space-y-1 text-sm text-stone-600">
                   <li>• Worker profiles</li>
                   <li>• Assignment tracking</li>
@@ -398,14 +403,15 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="relative aspect-video bg-stone-100 rounded-lg overflow-hidden mb-4">
-                  <Image
+                <div className="relative aspect-video bg-stone-100 rounded-lg overflow-hidden">
+                  <ClickableImage
                     src="/screenshots/jobs-page.webp"
                     alt="Job management interface"
-                    fill
-                    className="object-cover"
+                    width={1000}
+                    height={1000}
                   />
                 </div>
+                <p className="text-[8px] text-stone-600 text-center italic my-2">Scroll up within the frame to zoom in and down to zoom out</p>
                 <ul className="space-y-1 text-sm text-stone-600">
                   <li>• Job status tracking</li>
                   <li>• Delegation capabilities</li>

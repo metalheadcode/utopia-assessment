@@ -29,6 +29,7 @@ import { useRouter } from "next/navigation";
 import { generateOrderId } from "@/lib/orderId";
 import { UserService } from "@/lib/user-service";
 import Link from "next/link";
+import Image from "next/image";
 
 // Customer interface
 interface Customer {
@@ -43,6 +44,19 @@ interface Customer {
     isActive?: boolean;
     createdAt: Date | null;
     updatedAt: Date | null;
+}
+
+
+interface OrderPreviewProps {
+    customerName: string;
+    phone: string;
+    address: string;
+    service: string;
+    quotedPrice: string;
+    assignedTechnician: string;
+    adminNotes: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    errors: any;
 }
 
 // Enhanced validation schema
@@ -100,7 +114,7 @@ export default function SubmitOrderPage() {
         }
     });
 
-    const { control, handleSubmit, reset, watch, formState: { errors } } = form;
+    const { control, handleSubmit, reset, watch, formState: { errors }, setError } = form;
 
     // Load workers and customers on component mount
     useEffect(() => {
@@ -194,7 +208,7 @@ export default function SubmitOrderPage() {
             const customerName = data.customerName || form.getValues('customerName');
             const customerPhone = data.phone || form.getValues('phone');
             const customerAddress = data.address || form.getValues('address');
-            
+
             if (!customerEmail) {
                 throw new Error("Customer email is required");
             }
@@ -217,7 +231,7 @@ export default function SubmitOrderPage() {
 
                 // Update customer data if needed
                 const { updateDoc, doc } = await import('firebase/firestore');
-                
+
                 await updateDoc(doc(db, "customers", customerId), {
                     name: customerName,
                     phone: customerPhone,
@@ -329,17 +343,6 @@ export default function SubmitOrderPage() {
             setIsSubmitting(false);
         }
     };
-
-    const customerName = watch("customerName") || "N/A";
-    const phone = watch("phone") || "N/A";
-    const address = watch("address") || "N/A";
-    const service = watch("service") || "N/A";
-    const quotedPrice = watch("quotedPrice") || "N/A";
-    const assignedTechnicianUid = watch("assignedTechnician") || "";
-    const assignedTechnician = assignedTechnicianUid
-        ? workers.find(w => w.uid === assignedTechnicianUid)?.displayName || "N/A"
-        : "N/A";
-    const adminNotes = watch("adminNotes") || "N/A";
 
     return (
         <div className="space-y-6">
@@ -460,6 +463,20 @@ export default function SubmitOrderPage() {
                                                         placeholder="Enter your email address"
                                                         type="email"
                                                         {...field}
+                                                        onChange={(e) => {
+                                                            field.onChange(e);
+                                                            if (user?.email === e.target.value) {
+                                                                toast.warning("You cannot use your own email address as a customer");
+                                                                setError("customerEmail", {
+                                                                    message: "You cannot use your own email address as a customer"
+                                                                });
+                                                                // DELETE THE VALUE
+                                                                field.onChange("");
+                                                            } else {
+                                                                // CLEAR AN ERROR
+                                                                delete errors.customerEmail;
+                                                            }
+                                                        }}
                                                     />
                                                 </FormControl>
                                                 <FormDescription>
@@ -639,7 +656,7 @@ export default function SubmitOrderPage() {
                                                     </Select>
                                                 </FormControl>
                                                 <FormDescription>
-                                                    If no technicians are available, please create a new technician <Link className="text-blue-500 underline" href="/dashboard/worker-list">here</Link>
+                                                    If no technicians are available, please create a new technician <Link target="_blank" className="text-blue-500 underline" href="/dashboard/worker-list">here</Link>
                                                 </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
@@ -701,75 +718,103 @@ export default function SubmitOrderPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="col-span-5 h-fit sticky top-5">
-                    <CardHeader>
-                        <CardTitle>Order Preview</CardTitle>
-                        <CardDescription>
-                            Live preview of your order details
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            <div>
-                                <h3 className="text-sm font-medium text-muted-foreground mb-2">Customer Information</h3>
-                                <div className="space-y-2 grid grid-cols-2 grid-rows-auto gap-2">
-                                    <div className="col-span-1">
-                                        <Label className="text-xs text-muted-foreground">Name</Label>
-                                        <p className="font-medium">{customerName}</p>
-                                    </div>
-                                    <div className="col-span-1">
-                                        <Label className="text-xs text-muted-foreground">Phone</Label>
-                                        <p className="font-medium">{phone}</p>
-                                    </div>
-                                    <div className="col-span-2">
-                                        <Label className="text-xs text-muted-foreground">Address</Label>
-                                        <p className="font-medium">{address}</p>
-                                    </div>
-                                </div>
-                            </div>
+                <OrderPreview
+                    customerName={watch("customerName")}
+                    phone={watch("phone")}
+                    address={watch("address")}
+                    service={watch("service")}
+                    quotedPrice={watch("quotedPrice")}
+                    assignedTechnician={watch("assignedTechnician")
+                        ? workers.find(w => w.uid === watch("assignedTechnician"))?.displayName || "N/A"
+                        : "N/A"}
+                    adminNotes={watch("adminNotes") || "N/A"}
+                    errors={errors}
+                />
 
-                            <Separator />
-
-                            <div>
-                                <h3 className="text-sm font-medium text-muted-foreground mb-2">Order Details</h3>
-                                <div className="space-y-2">
-                                    <div>
-                                        <Label className="text-xs text-muted-foreground">Service</Label>
-                                        <p className="font-medium">{service}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs text-muted-foreground">Quoted Price</Label>
-                                        <p className="font-medium">{quotedPrice}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs text-muted-foreground" >Assigned Technician</Label>
-                                        <p className="font-medium">{assignedTechnician}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs text-muted-foreground">Admin Notes</Label>
-                                        <p className="font-medium">{adminNotes}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {errors && Object.keys(errors).length > 0 &&
-                            <div className="space-y-2 mt-4">
-                                {Object.keys(errors).map((key) => (
-                                    <Alert key={key} variant="destructive">
-                                        <Terminal />
-                                        <AlertTitle>Error</AlertTitle>
-                                        <AlertDescription>
-                                            {errors[key as keyof typeof errors]?.message}
-                                        </AlertDescription>
-                                    </Alert>
-                                ))}
-                            </div>
-                        }
-                        {/* ERROR END HERE  */}
-                    </CardContent>
-                </Card>
             </div>
         </div>
     );
+}
+
+
+const OrderPreview = ({
+    customerName,
+    phone,
+    address,
+    service,
+    quotedPrice,
+    assignedTechnician,
+    adminNotes,
+    errors,
+}: OrderPreviewProps) => {
+    return (
+        <div className="sticky top-10 col-span-5 rounded-xl overflow-hidden shadow-lg ">
+            <div className="h-[150px] w-full overflow-hidden relative">
+                <Image src="/images/login.webp" alt="Order Preview" width={500} height={500} className="absolute -top-[80px] left-0 right-0 h-auto w-full object-cover" />
+            </div>
+            <div className="space-y-4 p-4">
+                <div>
+                    <h3 className="text-xl font-bold text-muted-foreground mb-2">Order Summary</h3>
+                    <p className="text-sm text-muted-foreground">
+                        Please review the order details before submitting.
+                    </p>
+                </div>
+                <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Customer Information</h3>
+                    <div className="space-y-2 grid grid-cols-2 grid-rows-auto gap-2">
+                        <div className="col-span-1">
+                            <Label className="text-xs text-muted-foreground">Name</Label>
+                            <p className="font-medium">{customerName || "N/A"}</p>
+                        </div>
+                        <div className="col-span-1">
+                            <Label className="text-xs text-muted-foreground">Phone</Label>
+                            <p className="font-medium">{phone || "N/A"}</p>
+                        </div>
+                        <div className="col-span-2">
+                            <Label className="text-xs text-muted-foreground">Address</Label>
+                            <p className="font-medium">{address || "N/A"}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Order Details</h3>
+                    <div className="space-y-2">
+                        <div>
+                            <Label className="text-xs text-muted-foreground">Service</Label>
+                            <p className="font-medium">{service || "N/A"}</p>
+                        </div>
+                        <div>
+                            <Label className="text-xs text-muted-foreground">Quoted Price</Label>
+                            <p className="font-medium">{quotedPrice || "N/A"}</p>
+                        </div>
+                        <div>
+                            <Label className="text-xs text-muted-foreground" >Assigned Technician</Label>
+                            <p className="font-medium">{assignedTechnician || "N/A"}</p>
+                        </div>
+                        <div>
+                            <Label className="text-xs text-muted-foreground">Admin Notes</Label>
+                            <p className="font-medium">{adminNotes || "N/A"}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {errors && Object.keys(errors).length > 0 &&
+                <div className="space-y-2 mt-4">
+                    {Object.keys(errors).map((key) => (
+                        <Alert key={key} variant="destructive">
+                            <Terminal />
+                            <AlertTitle>Error</AlertTitle>
+                            <AlertDescription>
+                                {errors[key as keyof typeof errors]?.message}
+                            </AlertDescription>
+                        </Alert>
+                    ))}
+                </div>
+            }
+        </div>
+    )
 }
