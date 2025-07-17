@@ -10,6 +10,7 @@ import { useAuth } from "@/app/context/auth-context"
 import { toast } from "sonner"
 import { useState } from "react"
 import Link from "next/link"
+import { Loader2 } from "lucide-react"
 
 
 export function LoginForm({
@@ -69,8 +70,8 @@ export function LoginForm({
                   required
                 />
               </div>
-              <Button type="submit" className="w-full">
-                Login
+              <Button disabled={isSending} type="submit" className="w-full">
+                {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Login"}
               </Button>
             </div>
           </form>
