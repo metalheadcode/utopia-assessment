@@ -297,7 +297,22 @@ export default function TakeJob() {
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {/* REQUEST ADMIN ACCESS */}
+                        <div className="bg-stone-800 p-6 rounded-xl shadow-sm space-y-4 h-fit">
+                            <Image className="rounded-lg" src="/screenshots/admin-invitation.webp" alt="Admin invitation interface" width={1000} height={1000} />
+                            <h3 className="text-lg font-semibold text-stone-300 mb-3">How to Request Admin Access</h3>
+                            <p className="text-stone-400 text-sm">
+                                In this tutorial, you will learn how to request admin access to the system.
+                            </p>
+                            <Link href="/tutorial/request-admin">
+                                <Button variant="outline" className="w-full">
+                                    View Tutorial
+                                </Button>
+                            </Link>
+                        </div>
+
+                        {/* CREATE ORDER */}
                         <div className="bg-stone-800 p-6 rounded-xl shadow-sm space-y-4 h-fit">
                             <Image className="rounded-lg" src="/screenshots/submit-new-order.webp" alt="Order submission form" width={1000} height={1000} />
                             <h3 className="text-lg font-semibold text-stone-300 mb-3">How to Create Order</h3>
@@ -311,13 +326,14 @@ export default function TakeJob() {
                             </Link>
                         </div>
 
+                        {/* CHANGE ROLE */}
                         <div className="bg-stone-800 p-6 rounded-xl shadow-sm space-y-4 h-fit">
-                            <Image className="rounded-lg" src="/screenshots/admin-invitation.webp" alt="Admin invitation interface" width={1000} height={1000} />
-                            <h3 className="text-lg font-semibold text-stone-300 mb-3">How to Request Admin Access</h3>
+                            <Image className="rounded-lg" src="/screenshots/role-management.webp" alt="Role management interface" width={1000} height={1000} />
+                            <h3 className="text-lg font-semibold text-stone-300 mb-3">How to Manage Roles</h3>
                             <p className="text-stone-400 text-sm">
-                                In this tutorial, you will learn how to request admin access to the system.
+                                In this tutorial, you will learn how to convert clients to workers.
                             </p>
-                            <Link href="/tutorial/request-admin">
+                            <Link href="/tutorial/role-management">
                                 <Button variant="outline" className="w-full">
                                     View Tutorial
                                 </Button>
