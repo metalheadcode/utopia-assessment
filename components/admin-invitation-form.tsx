@@ -103,16 +103,14 @@ export default function AdminInvitationForm() {
         </form>}
 
         {/* result?.type === "error" && result.message === "User is already an admin" */}
-        {result?.type === "error" && result.message === "User is already an admin" && (
-          <div className="space-y-2 mt-2">
-            <p>You are already an admin. Click here to login.</p>
-            <Link href="/login" className="text-stone-600 hover:text-stone-800 underline text-center">
-              <Button className="w-full">
-                Login
-              </Button>
-            </Link>
-          </div>
-        )}
+        <div className="space-y-2 mt-2">
+          <p>Already an admin?. Click here to login.</p>
+          <Link href="/login" className="text-stone-600 hover:text-stone-800 underline text-center">
+            <Button className="w-full">
+              Login
+            </Button>
+          </Link>
+        </div>
 
         {result && (
           <Alert className={`mt-4 ${result.type === 'success' ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}>
