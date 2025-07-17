@@ -21,6 +21,20 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SejookNamastey",
   description: "SejookNamastey: Dashboard for Sejuk Sejuk Services Sdn Bhd, made by @metalheadcode",
+  openGraph: {
+    title: "SejookNamastey",
+    description: "SejookNamastey: Dashboard for Sejuk Sejuk Services Sdn Bhd, made by @metalheadcode",
+    url: "https://utopia-assessment.vercel.app",
+    type: "website",
+    images: [
+      {
+        url: "/images/og.jpeg",
+        width: 1200,
+        height: 720,
+        type: "image/jpeg",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -30,14 +44,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <meta property="og:image" content="/images/og.jpeg" />
-      <meta property="og:title" content="SejookNamastey" />
-      <meta property="og:description" content="SejookNamastey: Dashboard for Sejuk Sejuk Services Sdn Bhd, made by @metalheadcode" />
-      <meta property="og:url" content="https://utopia-assessment.vercel.app" />
-      <meta property="og:type" content="website" />
-      <meta property="og:image:type" content="image/jpeg" />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="720" />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
