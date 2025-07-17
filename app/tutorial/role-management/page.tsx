@@ -1,11 +1,11 @@
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, CheckCircle, AlertTriangle, Shield, UserPlus } from "lucide-react";
+import { Users, CheckCircle, AlertTriangle, Shield, Wrench, User } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function RequestAdmin() {
+export default function RoleManagementTutorial() {
     return (
         <>
             {/* Hero Section */}
@@ -15,11 +15,11 @@ export default function RequestAdmin() {
                         Tutorial Guide
                     </Badge>
                     <h1 className="text-4xl md:text-6xl font-bold text-stone-900 mb-6">
-                        How to Request
-                        <span className="text-stone-700 block">Admin Access</span>
+                        How to Manage
+                        <span className="text-stone-700 block">User Roles</span>
                     </h1>
                     <p className="text-xl text-stone-600 mb-8 max-w-2xl mx-auto">
-                        Follow this step-by-step guide to request and activate your administrator privileges for the SejookNamastey service management system.
+                        Learn how to convert clients to workers and manage user roles effectively in the SejookNamastey system.
                     </p>
                 </div>
             </section>
@@ -30,7 +30,7 @@ export default function RequestAdmin() {
                     <div className="text-center mb-12">
                         <h2 className="text-3xl font-bold text-stone-900 mb-4">Complete Guide in 4 Steps</h2>
                         <p className="text-stone-600 max-w-2xl mx-auto">
-                            Everything you need to know to successfully request and activate your admin account
+                            Everything you need to know to successfully convert clients to workers and manage user roles
                         </p>
                     </div>
 
@@ -43,9 +43,9 @@ export default function RequestAdmin() {
                                         <span className="text-white font-bold text-lg">1</span>
                                     </div>
                                     <div>
-                                        <CardTitle className="text-stone-900">Submit Your Email Address</CardTitle>
+                                        <CardTitle className="text-stone-900">Navigate to Role Management</CardTitle>
                                         <CardDescription>
-                                            Provide your legitimate email address to receive the admin invitation
+                                            Access the role management section from your admin dashboard
                                         </CardDescription>
                                     </div>
                                 </div>
@@ -54,18 +54,17 @@ export default function RequestAdmin() {
                                 <div className="grid md:grid-cols-2 gap-8 items-start">
                                     <div className="space-y-4">
                                         <p className="text-stone-600 leading-relaxed">
-                                            To begin the admin access request process,I locate the input form at the <Link className="text-blue-500 underline" target="_blank" href="/#cta">bottom of the landing page</Link>. You&apos;ll need to provide your legitimate email address.
-                                            This email address will be used to send your administrative invitation and will serve as your login credentials.
+                                            First, log in to your admin dashboard and navigate to the &quot;Role Management&quot; section.
+                                            This page displays all users in the system with their current roles (Admin, Worker, or Client).
                                         </p>
 
-                                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                             <div className="flex items-start gap-3">
-                                                <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+                                                <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
                                                 <div>
-                                                    <h4 className="font-semibold text-amber-800 mb-1">Important Note</h4>
-                                                    <p className="text-amber-700 text-sm">
-                                                        Make sure to check your spam or junk folder if you don&apos;t see the invitation in your inbox.
-                                                        Email filters sometimes catch automated invitations.
+                                                    <h4 className="font-semibold text-blue-800 mb-1">Admin Access Required</h4>
+                                                    <p className="text-blue-700 text-sm">
+                                                        Only users with admin privileges can access the role management functionality.
                                                     </p>
                                                 </div>
                                             </div>
@@ -75,8 +74,8 @@ export default function RequestAdmin() {
                                     <div className="bg-stone-50 rounded-lg p-4">
                                         <Image
                                             className="rounded-lg shadow-md w-full h-auto object-contain border"
-                                            src="/images/request-admin/insert-email.webp"
-                                            alt="Email submission form interface"
+                                            src="/screenshots/role-management.webp"
+                                            alt="Role management interface"
                                             width={800}
                                             height={500}
                                         />
@@ -93,9 +92,9 @@ export default function RequestAdmin() {
                                         <span className="text-white font-bold text-lg">2</span>
                                     </div>
                                     <div>
-                                        <CardTitle className="text-stone-900">Check Your Email for Invitation</CardTitle>
+                                        <CardTitle className="text-stone-900">Find and Select the Client</CardTitle>
                                         <CardDescription>
-                                            You&apos;ll receive an administrative invitation email with a secure activation link
+                                            Use search and filters to locate the client you want to convert
                                         </CardDescription>
                                     </div>
                                 </div>
@@ -104,18 +103,18 @@ export default function RequestAdmin() {
                                 <div className="grid md:grid-cols-2 gap-8 items-start">
                                     <div className="space-y-4">
                                         <p className="text-stone-600 leading-relaxed">
-                                            After submitting your email address, you&apos;ll receive an administrative invitation email.
-                                            The email will contain a secure link to activate your admin privileges.
+                                            Use the search bar to find the specific client by email or name.
+                                            You can also filter by role to show only clients.
+                                            Each user displays their current role badge (Client, Worker, or Admin).
                                         </p>
 
-                                        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                                             <div className="flex items-start gap-3">
-                                                <Mail className="w-5 h-5 text-emerald-600 mt-0.5" />
+                                                <User className="w-5 h-5 text-amber-600 mt-0.5" />
                                                 <div>
-                                                    <h4 className="font-semibold text-emerald-800 mb-1">Email Details</h4>
-                                                    <p className="text-emerald-700 text-sm">
-                                                        The invitation email will arrive from the SejookNamastey system.
-                                                        Look for the subject line containing &quot;Admin Invitation&quot; or similar.
+                                                    <h4 className="font-semibold text-amber-800 mb-1">Role Identification</h4>
+                                                    <p className="text-amber-700 text-sm">
+                                                        Client roles are shown with a gray badge, Workers with blue, and Admins with red.
                                                     </p>
                                                 </div>
                                             </div>
@@ -125,8 +124,8 @@ export default function RequestAdmin() {
                                     <div className="bg-stone-50 rounded-lg p-4">
                                         <Image
                                             className="rounded-lg shadow-md w-full h-auto object-contain border"
-                                            src="/images/request-admin/email-admin-invite.webp"
-                                            alt="Sample admin invitation email"
+                                            src="/images/role-management/filter.webp"
+                                            alt="Filter exisiting emails"
                                             width={800}
                                             height={500}
                                         />
@@ -143,40 +142,47 @@ export default function RequestAdmin() {
                                         <span className="text-white font-bold text-lg">3</span>
                                     </div>
                                     <div>
-                                        <CardTitle className="text-stone-900">Accept the Invitation</CardTitle>
+                                        <CardTitle className="text-stone-900">Open Role Management Dialog</CardTitle>
                                         <CardDescription>
-                                            Click the link to begin the account activation process
+                                            Click the &quot;Manage Role&quot; button to open the role management dialog
                                         </CardDescription>
                                     </div>
                                 </div>
                             </CardHeader>
                             <CardContent>
                                 <div className="grid md:grid-cols-2 gap-8 items-start">
-                                    <div className="space-y-4">
+                                    <div className="space-y-4 md:sticky md:top-[100px] relative">
                                         <p className="text-stone-600 leading-relaxed">
-                                            Click the secure link in your invitation email to begin the acceptance process.
-                                            You&apos;ll be redirected to a confirmation page where you can activate your admin access.
+                                            Click the &quot;Manage Role&quot; button next to the client you want to convert.
+                                            This opens a dialog that analyzes the user&apos;s current dependencies and
+                                            provides options for role conversion.
                                         </p>
 
-                                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                                             <div className="flex items-start gap-3">
-                                                <Shield className="w-5 h-5 text-amber-600 mt-0.5" />
+                                                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
                                                 <div>
-                                                    <h4 className="font-semibold text-amber-800 mb-1">Security Notice</h4>
-                                                    <p className="text-amber-700 text-sm">
-                                                        After accepting the invitation, you&apos;ll receive a second email for secure login.
-                                                        This two-step process ensures your account security.
+                                                    <h4 className="font-semibold text-green-800 mb-1">Dependency Check</h4>
+                                                    <p className="text-green-700 text-sm">
+                                                        The system automatically checks for any orders or jobs that might be affected.
                                                     </p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-stone-50 rounded-lg p-4">
+                                    <div className="bg-stone-50 rounded-lg p-4 space-y-4">
                                         <Image
                                             className="rounded-lg shadow-md w-full h-auto object-contain border"
-                                            src="/images/request-admin/accept-invite.webp"
-                                            alt="Admin invitation acceptance page"
+                                            src="/images/role-management/manage-role-button.webp"
+                                            alt="Manage role button"
+                                            width={800}
+                                            height={500}
+                                        />
+                                        <Image
+                                            className="rounded-lg shadow-md w-full h-auto object-contain border"
+                                            src="/images/role-management/manage-role-dialogue.webp"
+                                            alt="Manage role button"
                                             width={800}
                                             height={500}
                                         />
@@ -193,40 +199,47 @@ export default function RequestAdmin() {
                                         <span className="text-white font-bold text-lg">4</span>
                                     </div>
                                     <div>
-                                        <CardTitle className="text-stone-900">Access the Admin Portal</CardTitle>
+                                        <CardTitle className="text-stone-900">Convert Client to Worker</CardTitle>
                                         <CardDescription>
-                                            Complete the login process and start managing the system
+                                            Select Worker role and handle data migration if needed
                                         </CardDescription>
                                     </div>
                                 </div>
                             </CardHeader>
                             <CardContent>
                                 <div className="grid md:grid-cols-2 gap-8 items-start">
-                                    <div className="space-y-4">
+                                    <div className="space-y-4 md:sticky md:top-[100px] relative">
                                         <p className="text-stone-600 leading-relaxed">
-                                            Congratulations! After completing the authentication process, you&apos;ll be redirected to the admin dashboard.
-                                            You can now access all administrative features, including order management and system controls.
+                                            Select &quot;Worker&quot; from the role dropdown and provide a reason for the change.
+                                            If the client has existing orders, you can choose to migrate their customer data.
+                                            Click &quot;Change Role&quot; to complete the conversion.
                                         </p>
 
-                                        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                                             <div className="flex items-start gap-3">
-                                                <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5" />
+                                                <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
                                                 <div>
-                                                    <h4 className="font-semibold text-emerald-800 mb-1">Next Steps</h4>
-                                                    <p className="text-emerald-700 text-sm">
-                                                        Navigate to the &quot;Submit Order&quot; page to begin managing service requests and orders.
-                                                        Explore the dashboard to familiarize yourself with available tools.
+                                                    <h4 className="font-semibold text-amber-800 mb-1">Data Migration</h4>
+                                                    <p className="text-amber-700 text-sm">
+                                                        Consider whether to migrate existing customer orders when converting to worker.
                                                     </p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-stone-50 rounded-lg p-4">
+                                    <div className="bg-stone-50 rounded-lg p-4 space-y-4">
                                         <Image
                                             className="rounded-lg shadow-md w-full h-auto object-contain border"
-                                            src="/images/request-admin/auth-login.webp"
-                                            alt="Admin portal dashboard interface"
+                                            src="/images/role-management/manage-role-button.webp"
+                                            alt="Manage role button"
+                                            width={800}
+                                            height={500}
+                                        />
+                                        <Image
+                                            className="rounded-lg shadow-md w-full h-auto object-contain border"
+                                            src="/images/role-management/manage-role-dialogue.webp"
+                                            alt="Manage role button"
                                             width={800}
                                             height={500}
                                         />
@@ -241,59 +254,72 @@ export default function RequestAdmin() {
             {/* Summary Section */}
             <section className="py-16 px-4 bg-stone-800 text-white">
                 <div className="container mx-auto text-center">
-                    <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+                    <h2 className="text-3xl font-bold mb-4">Role Management Made Simple</h2>
                     <p className="text-stone-200 mb-8 max-w-2xl mx-auto">
-                        Follow these four simple steps to gain administrative access to the SejookNamastey service management system.
+                        Follow these four steps to effectively manage user roles and convert clients to workers in your system.
                     </p>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
                         <div className="flex items-center justify-center space-x-3">
-                            <UserPlus className="w-5 h-5 text-stone-200" />
-                            <div className="text-left">
-                                <p className="font-semibold">Email Submission</p>
-                                <p className="text-stone-200 text-sm">Quick & Secure</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-center space-x-3">
-                            <Mail className="w-5 h-5 text-stone-200" />
-                            <div className="text-left">
-                                <p className="font-semibold">Email Invitation</p>
-                                <p className="text-stone-200 text-sm">Automated Process</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-center space-x-3">
                             <Shield className="w-5 h-5 text-stone-200" />
                             <div className="text-left">
-                                <p className="font-semibold">Secure Activation</p>
-                                <p className="text-stone-200 text-sm">Two-Step Verification</p>
+                                <p className="font-semibold">Access Management</p>
+                                <p className="text-stone-200 text-sm">Admin Dashboard</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-center space-x-3">
+                            <Users className="w-5 h-5 text-stone-200" />
+                            <div className="text-left">
+                                <p className="font-semibold">Find Users</p>
+                                <p className="text-stone-200 text-sm">Search & Filter</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-center space-x-3">
+                            <Wrench className="w-5 h-5 text-stone-200" />
+                            <div className="text-left">
+                                <p className="font-semibold">Role Dialog</p>
+                                <p className="text-stone-200 text-sm">Dependency Check</p>
                             </div>
                         </div>
 
                         <div className="flex items-center justify-center space-x-3">
                             <CheckCircle className="w-5 h-5 text-stone-200" />
                             <div className="text-left">
-                                <p className="font-semibold">Full Access</p>
-                                <p className="text-stone-200 text-sm">Admin Dashboard</p>
+                                <p className="font-semibold">Convert Role</p>
+                                <p className="text-stone-200 text-sm">Client to Worker</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-
             {/* Tutorial Section */}
             <section id="tutorial" className="py-16 px-4 bg-stone-900">
                 <div className="container mx-auto">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold text-stone-50 mb-4">Another Tutorial</h2>
+                        <h2 className="text-3xl font-bold text-stone-50 mb-4">More Tutorials</h2>
                         <p className="text-stone-200 max-w-2xl mx-auto">
-                            Follow the tutorial to explore the system
+                            Explore other system features and learn how to use them effectively
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
+                        {/* REQUEST ADMIN ACCESS */}
+                        <div className="bg-stone-800 p-6 rounded-xl shadow-sm space-y-4 h-fit">
+                            <Image className="rounded-lg" src="/screenshots/admin-invitation.webp" alt="Admin invitation interface" width={1000} height={1000} />
+                            <h3 className="text-lg font-semibold text-stone-300 mb-3">How to Request Admin Access</h3>
+                            <p className="text-stone-400 text-sm">
+                                In this tutorial, you will learn how to request admin access to the system.
+                            </p>
+                            <Link href="/tutorial/request-admin">
+                                <Button variant="outline" className="w-full">
+                                    View Tutorial
+                                </Button>
+                            </Link>
+                        </div>
+
                         {/* CREATE ORDER */}
                         <div className="bg-stone-800 p-6 rounded-xl shadow-sm space-y-4 h-fit">
                             <Image className="rounded-lg" src="/screenshots/submit-new-order.webp" alt="Order submission form" width={1000} height={1000} />
@@ -316,20 +342,6 @@ export default function RequestAdmin() {
                                 In this tutorial, you will learn how to take a job in the system.
                             </p>
                             <Link href="/tutorial/take-job">
-                                <Button variant="outline" className="w-full">
-                                    View Tutorial
-                                </Button>
-                            </Link>
-                        </div>
-
-                        {/* CHANGE ROLE */}
-                        <div className="bg-stone-800 p-6 rounded-xl shadow-sm space-y-4 h-fit">
-                            <Image className="rounded-lg" src="/screenshots/role-management.webp" alt="Role management interface" width={1000} height={1000} />
-                            <h3 className="text-lg font-semibold text-stone-300 mb-3">How to Manage Roles</h3>
-                            <p className="text-stone-400 text-sm">
-                                In this tutorial, you will learn how to convert clients to workers.
-                            </p>
-                            <Link href="/tutorial/role-management">
                                 <Button variant="outline" className="w-full">
                                     View Tutorial
                                 </Button>
