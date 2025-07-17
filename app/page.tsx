@@ -1,10 +1,11 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Mail, CheckCircle, Clock, Shield, Users, Star, Code, Database, Zap, Github, ExternalLink, Award, Eye, Settings, UserPlus, AirVent } from "lucide-react";
 import { ClickableImage } from "@/components/ui/clickable-image";
 import AdminInvitationForm from "@/components/admin-invitation-form";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -36,7 +37,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4">
+      <section id="hero" className="py-20 px-4">
         <div className="container mx-auto text-center">
           <Badge className="mb-4 bg-amber-100 text-amber-800 border-amber-200">
             Assessment Portfolio Showcase
@@ -86,7 +87,7 @@ export default function Home() {
       </section>
 
       {/* Assessment Modules Section */}
-      <section className="py-16 px-4 bg-stone-50">
+      <section id="assessment-modules" className="py-16 px-4 bg-stone-50">
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-stone-900 mb-4">Assessment Modules Completed</h2>
@@ -180,7 +181,7 @@ export default function Home() {
       </section>
 
       {/* Tech Stack Section */}
-      <section className="py-16 px-4 bg-white">
+      <section id="tech-stack" className="py-16 px-4 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-stone-900 mb-4">Technology Stack</h2>
@@ -242,7 +243,7 @@ export default function Home() {
       </section>
 
       {/* Feature Showcase Section */}
-      <section className="py-16 px-4 bg-amber-50">
+      <section id="feature-showcase" className="py-16 px-4 bg-amber-50">
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-stone-900 mb-4">Feature Showcase</h2>
@@ -423,8 +424,61 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Tutorial Section */}
+      <section id="tutorial" className="py-16 px-4 bg-stone-900 mt-16">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-stone-50 mb-4">Tutorial</h2>
+            <p className="text-stone-200 max-w-2xl mx-auto">
+              Follow the tutorial to explore the system
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-stone-800 p-6 rounded-xl shadow-sm space-y-4 h-fit">
+              <Image className="rounded-lg" src="/screenshots/admin-invitation.webp" alt="Admin invitation interface" width={1000} height={1000} />
+              <h3 className="text-lg font-semibold text-stone-300 mb-3">How to Request Admin Access</h3>
+              <p className="text-stone-400 text-sm">
+                In this tutorial, you will learn how to request admin access to the system.
+              </p>
+              <Link href="/tutorial/request-admin">
+                <Button variant="outline" className="w-full">
+                  View Tutorial
+                </Button>
+              </Link>
+            </div>
+
+            <div className="bg-stone-800 p-6 rounded-xl shadow-sm space-y-4 h-fit">
+              <Image className="rounded-lg" src="/screenshots/submit-new-order.webp" alt="Order submission form" width={1000} height={1000} />
+              <h3 className="text-lg font-semibold text-stone-300 mb-3">How to Create Order</h3>
+              <p className="text-stone-400 text-sm">
+                In this tutorial, you will learn how to create an order in the system.
+              </p>
+              <Link href="/tutorial/create-order">
+                <Button variant="outline" className="w-full">
+                  View Tutorial
+                </Button>
+              </Link>
+            </div>
+
+            <div className="bg-stone-800 p-6 rounded-xl shadow-sm space-y-4 h-fit">
+              <Image className="rounded-lg" src="/screenshots/jobs-page.webp" alt="Job management interface" width={1000} height={1000} />
+              <h3 className="text-lg font-semibold text-stone-300 mb-3">How to Take Job</h3>
+              <p className="text-stone-400 text-sm">
+                In this tutorial, you will learn how to take a job in the system.
+              </p>
+              <Link href="/tutorial/take-job">
+                <Button variant="outline" className="w-full">
+                  View Tutorial
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* System Architecture Section */}
-      <section className="py-16 px-4 bg-stone-50">
+      <section id="system-architecture" className="py-16 px-4 bg-stone-50">
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-stone-900 mb-4">System Architecture</h2>
@@ -510,7 +564,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 bg-stone-800 text-white">
+      <section id="cta" className="py-16 px-4 bg-stone-800 text-white">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Explore the System?</h2>
           <p className="text-stone-200 mb-8 max-w-2xl mx-auto">
@@ -576,8 +630,8 @@ export default function Home() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-stone-700 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold">S</span>
+                <div className="w-8 h-8 bg-stone-700 rounded-lg flex items-center justify-center p-2">
+                  <AirVent className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h3 className="font-bold">Assessment Portfolio</h3>
