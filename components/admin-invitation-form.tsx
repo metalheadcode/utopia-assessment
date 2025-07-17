@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 export default function AdminInvitationForm() {
   const [email, setEmail] = useState("");
@@ -101,6 +102,18 @@ export default function AdminInvitationForm() {
           </Button>
         </form>}
 
+        {/* result?.type === "error" && result.message === "User is already an admin" */}
+        {result?.type === "error" && result.message === "User is already an admin" && (
+          <div className="space-y-2 mt-2">
+            <p>You are already an admin. Click here to login.</p>
+            <Link href="/login" className="text-stone-600 hover:text-stone-800 underline text-center">
+              <Button className="w-full">
+                Login
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {result && (
           <Alert className={`mt-4 ${result.type === 'success' ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}>
             {result.type === 'success' ? (
@@ -110,18 +123,6 @@ export default function AdminInvitationForm() {
             )}
             <AlertDescription className={result.type === 'success' ? 'text-emerald-800' : 'text-red-800'}>
               {result.message}
-              {/* {result.loginUrl && (
-                <div className="mt-2 border w-full">
-                  <Link
-                    href={result.loginUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-stone-600 hover:text-stone-800 underline text-center"
-                  >
-                    OR click here to login directly
-                  </Link>
-                </div>
-              )} */}
             </AlertDescription>
           </Alert>
         )}
