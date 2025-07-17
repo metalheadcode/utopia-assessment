@@ -68,7 +68,7 @@ export default function AdminInvitationForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {result?.type !== 'success' && <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
             <Input
@@ -81,10 +81,10 @@ export default function AdminInvitationForm() {
               disabled={isLoading}
             />
           </div>
-          
-          <Button 
-            type="submit" 
-            className="w-full" 
+
+          <Button
+            type="submit"
+            className="w-full"
             disabled={isLoading || !email}
           >
             {isLoading ? (
@@ -99,7 +99,7 @@ export default function AdminInvitationForm() {
               </>
             )}
           </Button>
-        </form>
+        </form>}
 
         {result && (
           <Alert className={`mt-4 ${result.type === 'success' ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}>
@@ -110,18 +110,18 @@ export default function AdminInvitationForm() {
             )}
             <AlertDescription className={result.type === 'success' ? 'text-emerald-800' : 'text-red-800'}>
               {result.message}
-              {result.loginUrl && (
-                <div className="mt-2">
-                  <a 
-                    href={result.loginUrl} 
-                    target="_blank" 
+              {/* {result.loginUrl && (
+                <div className="mt-2 border w-full">
+                  <Link
+                    href={result.loginUrl}
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-stone-600 hover:text-stone-800 underline"
+                    className="text-stone-600 hover:text-stone-800 underline text-center"
                   >
-                    Or click here to login directly
-                  </a>
+                    OR click here to login directly
+                  </Link>
                 </div>
-              )}
+              )} */}
             </AlertDescription>
           </Alert>
         )}

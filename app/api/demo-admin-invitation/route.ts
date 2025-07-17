@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: "Admin invitation sent successfully! Check your email for the login link.",
+            message: "Admin invitation was sent to " + email + "! If you have not received it, please check your spam folder.",
             invitationId: invitationId,
             email: email,
             loginUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login?invitation=${invitationId}`
