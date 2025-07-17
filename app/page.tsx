@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mail, CheckCircle, Clock, Shield, Users, Star, Code, Database, Zap, Github, ExternalLink, Award, Eye, Settings, UserPlus, AirVent } from "lucide-react";
+import { Mail, CheckCircle, Clock, Shield, Users, Star, Code, Database, Zap, Github, ExternalLink, Award, Eye, Settings, UserPlus, AirVent, Monitor } from "lucide-react";
 import { ClickableImage } from "@/components/ui/clickable-image";
 import AdminInvitationForm from "@/components/admin-invitation-form";
 import Image from "next/image";
@@ -29,7 +29,7 @@ export default function Home() {
                 <span className="hidden sm:inline">GitHub</span>
               </a>
               <Link href="/login">
-                <Button>Live Demo</Button>
+                <Button><Monitor className="text-white" /> Login</Button>
               </Link>
             </div>
           </div>
