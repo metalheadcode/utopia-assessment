@@ -748,7 +748,7 @@ const OrderPreview = ({
     errors,
 }: OrderPreviewProps) => {
     return (
-        <div className="sticky top-10 col-span-5 rounded-xl overflow-hidden shadow-lg ">
+        <div className="relative md:sticky top-10 col-span-5 rounded-xl overflow-hidden shadow-lg">
             <div className="h-[150px] w-full overflow-hidden relative">
                 <Image src="/images/login.webp" alt="Order Preview" width={500} height={500} className="absolute -top-[80px] left-0 right-0 h-auto w-full object-cover" />
             </div>

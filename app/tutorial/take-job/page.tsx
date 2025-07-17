@@ -100,7 +100,7 @@ export default function TakeJob() {
                             </CardHeader>
                             <CardContent>
                                 <div className="grid md:grid-cols-2 gap-8 items-start relative">
-                                    <div className="space-y-4 sticky top-[100px]">
+                                    <div className="space-y-4 relative md:sticky md:top-[100px] ">
                                         <p className="text-stone-600 leading-relaxed">
                                             To manage workers effectively, you need to add them to your delegation team. This system prevents overwhelming admins with hundreds of workers by allowing you to manage only your assigned team members.
                                         </p>
@@ -171,7 +171,7 @@ export default function TakeJob() {
                             </CardHeader>
                             <CardContent>
                                 <div className="grid md:grid-cols-2 gap-8 items-start relative">
-                                    <div className="space-y-4 sticky top-[100px]">
+                                    <div className="space-y-4 relative md:sticky md:top-[100px]">
                                         <p className="text-stone-600 leading-relaxed">
                                             With workers in your delegation team, you can now assign jobs without system warnings. Select the appropriate worker from your delegation dropdown to assign the job. The system will track which administrator assigned the job.
                                         </p>
