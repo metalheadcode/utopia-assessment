@@ -6,6 +6,8 @@ import { AuthProvider } from "./context/auth-context";
 import { EmailLinkHandler } from "@/components/email-link-handler";
 import { WhatsappProvider } from "./context/whatsapp";
 
+
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -19,6 +21,20 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SejookNamastey",
   description: "SejookNamastey: Dashboard for Sejuk Sejuk Services Sdn Bhd, made by @metalheadcode",
+  openGraph: {
+    title: "SejookNamastey",
+    description: "SejookNamastey: Dashboard for Sejuk Sejuk Services Sdn Bhd, made by @metalheadcode",
+    url: "https://utopia-assessment.vercel.app",
+    type: "website",
+    images: [
+      {
+        url: "/images/og.jpeg",
+        width: 1200,
+        height: 720,
+        type: "image/jpeg",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
