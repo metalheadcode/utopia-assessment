@@ -10,7 +10,7 @@ export default function TutorialLayout({
 
     return <main className="min-h-screen bg-gradient-to-br from-stone-50 to-amber-50">
         {/* Navigation Header */}
-        <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50 border-b border-stone-200">
+        <header className="bg-white/80 backdrop-blur-sm shadow-sm relative md:sticky md:top-0 z-50 border-b border-stone-200">
             <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
                     <Link href="/" className="flex items-center space-x-2 cursor-pointer" >
