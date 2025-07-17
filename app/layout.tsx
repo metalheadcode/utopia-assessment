@@ -21,6 +21,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SejookNamastey",
   description: "SejookNamastey: Dashboard for Sejuk Sejuk Services Sdn Bhd, made by @metalheadcode",
+  metadataBase: new URL("https://utopia-assessment.vercel.app"),
   openGraph: {
     title: "SejookNamastey",
     description: "SejookNamastey: Dashboard for Sejuk Sejuk Services Sdn Bhd, made by @metalheadcode",
